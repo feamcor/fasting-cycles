@@ -15,10 +15,16 @@ export interface Plan {
   rules: FastingRule[];
 }
 
+export interface CycleEntry {
+  startDate: string; // ISO Date
+  endDate?: string;  // ISO Date (optional, if not yet ended)
+}
+
 export interface UserSettings {
   cycleLength: number; // Default 28
   periodLength: number; // Default 5
-  lastPeriodStart: string | null; // ISO Date
+  lastPeriodStart: string | null; // Keep for backward compat
+  cycleHistory: CycleEntry[]; // Array of CycleEntry objects
   selectedPlanId: string;
   isFastingEnabled: boolean;
 }

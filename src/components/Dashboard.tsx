@@ -78,11 +78,70 @@ const Dashboard = () => {
                     Today's Guidance
                 </h4>
                 <p style={{ fontSize: '1.1rem', lineHeight: 1.6 }}>{advice.text}</p>
-                {activeRule?.description && (
-                    <p style={{ marginTop: 'var(--space-md)', fontSize: '0.95rem', color: 'var(--c-text-muted)', fontStyle: 'italic' }}>
-                        "{activeRule.description}"
-                    </p>
-                )}
+
+            </div>
+
+            {/* Reality Check Controls */}
+            <div style={{
+                marginBottom: 'var(--space-lg)',
+                background: 'var(--c-surface)',
+                padding: 'var(--space-md)',
+                borderRadius: 'var(--radius-lg)',
+                boxShadow: 'var(--shadow-sm)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+            }}>
+                <div>
+                    <h3 style={{ fontSize: '1rem', marginBottom: '4px' }}>Reality Check</h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>Is your body telling you something different?</p>
+                </div>
+
+                {(() => {
+                    const history = useSettingsStore.getState().cycleHistory;
+                    const latest = history[0]; // Latest entry
+                    const todayStr = new Date().toISOString().split('T')[0];
+
+                    const isPeriodActive = latest && !latest.endDate;
+
+                    if (isPeriodActive) {
+                        return (
+                            <button onClick={() => {
+                                if (confirm('Did your period end today?')) {
+                                    useSettingsStore.getState().logPeriodEnd(todayStr);
+                                }
+                            }} style={{
+                                background: 'var(--c-surface)',
+                                border: '2px solid var(--c-text-main)',
+                                color: 'var(--c-text-main)',
+                                padding: '8px 16px',
+                                borderRadius: '20px',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                            }}>
+                                End Period
+                            </button>
+                        );
+                    } else {
+                        return (
+                            <button onClick={() => {
+                                if (confirm('Did your period start today?')) {
+                                    useSettingsStore.getState().logPeriodStart(todayStr);
+                                }
+                            }} style={{
+                                background: 'var(--c-accent)',
+                                border: 'none',
+                                color: 'var(--c-text-main)',
+                                padding: '8px 16px',
+                                borderRadius: '20px',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                            }}>
+                                Start Period
+                            </button>
+                        );
+                    }
+                })()}
             </div>
 
             <Calendar />

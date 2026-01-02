@@ -136,12 +136,23 @@ const Calendar = () => {
                             borderRadius: '50%',
                             background: isSelectedMonth ? backgroundColor : 'transparent',
                             border: `2px solid ${isToday ? 'var(--c-text-main)' : borderColor}`,
-                            opacity: isSelectedMonth ? (isPeriod ? 0.8 : (backgroundColor !== 'transparent' ? 0.4 : 1)) : 0.2,
+                            opacity: isSelectedMonth ? (isPeriod ? 0.8 : (backgroundColor !== 'transparent' ? 0.6 : 1)) : 0.2, // increased opacity for visibility
                             color: isSelectedMonth ? 'inherit' : 'var(--c-text-muted)',
                             fontSize: '0.9rem',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            position: 'relative'
                         }}>
-                            <span>{format(date, dateFormat)}</span>
+                            {getDayInfo(date).rule?.type === 'NO_FASTING' && isSelectedMonth && (
+                                <div style={{
+                                    position: 'absolute',
+                                    width: '100%',
+                                    height: '2px',
+                                    background: 'var(--c-text-muted)',
+                                    transform: 'rotate(-45deg)',
+                                    opacity: 0.5
+                                }} />
+                            )}
+                            <span style={{ zIndex: 1 }}>{format(date, dateFormat)}</span>
                         </div>
                     );
                 })}
@@ -165,16 +176,22 @@ const Calendar = () => {
                 gap: 'var(--space-md)',
                 fontSize: '0.8rem',
                 justifyContent: 'center',
-                color: 'var(--c-text-muted)'
+                color: 'var(--c-text-muted)',
+                flexWrap: 'wrap'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--c-accent)' }} /> Period/Relax
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--c-accent)' }} /> Period
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--c-primary-light)' }} /> Gentle
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--c-primary-light)' }} /> Gentle Limit
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', border: '2px solid var(--c-primary)' }} /> Power
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, background: 'var(--c-accent)', borderRadius: '50%', position: 'relative' }}>
+                        <div style={{ width: '100%', height: '1px', background: 'currentcolor', transform: 'rotate(-45deg)' }} />
+                    </div> No Fasting
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid var(--c-primary)' }} /> Power
                 </div>
             </div>
         </div>
