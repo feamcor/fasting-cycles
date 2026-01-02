@@ -1,0 +1,49 @@
+:root {
+  /* HSL Color Palette - Premium & Calm */
+  --color-primary-hue: 280;
+  --color-primary-sat: 60%;
+  --color-primary-lightness: 60%;
+  
+  --color-accent-hue: 330;
+  --color-accent-sat: 70%;
+  --color-accent-lightness: 65%;
+
+  --c-primary: hsl(var(--color-primary-hue), var(--color-primary-sat), var(--color-primary-lightness));
+  --c-primary-dark: hsl(var(--color-primary-hue), var(--color-primary-sat), 40%);
+  --c-primary-light: hsl(var(--color-primary-hue), var(--color-primary-sat), 85%);
+  
+  --c-accent: hsl(var(--color-accent-hue), var(--color-accent-sat), var(--color-accent-lightness));
+  
+  --c-bg-app: #f8f9fa;
+  --c-text-main: #2d3436;
+  --c-text-muted: #636e72;
+  --c-surface: #ffffff;
+  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 3rem;
+
+  /* Typography */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-float: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg-app: #1a1b1e;
+    --c-surface: #25262b;
+    --c-text-main: #e9ecef;
+    --c-text-muted: #adb5bd;
+    
+    --c-primary: hsl(var(--color-primary-hue), var(--color-primary-sat), 70%);
+  }
+}
