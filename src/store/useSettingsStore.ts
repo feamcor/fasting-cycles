@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { UserSettings, CycleEntry } from '../types';
+import type { UserSettings, CycleEntry, Plan } from '../types';
 
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 
@@ -18,6 +18,11 @@ interface SettingsState extends UserSettings {
     fastingWindowStart: string; // HH:mm, e.g., "20:00" (start fasting)
     fastingWindowEnd: string;   // HH:mm, e.g., "12:00" (end fasting / start eating)
     setFastingWindow: (start: string, end: string) => void;
+
+    // Plan Management
+    addPlan: (plan: Plan) => void;
+    updatePlan: (plan: Plan) => void;
+    deletePlan: (id: string) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -29,6 +34,7 @@ export const useSettingsStore = create<SettingsState>()(
             cycleHistory: [],
             selectedPlanId: 'hormonal-harmony',
             isFastingEnabled: true,
+            customPlans: [],
 
             fastingWindowStart: '20:00', // Start fasting at 8 PM
             fastingWindowEnd: '12:00',   // Eat at 12 PM (16:8 by default)
@@ -139,6 +145,23 @@ export const useSettingsStore = create<SettingsState>()(
             setSelectedPlanId: (selectedPlanId) => set({ selectedPlanId }),
             setFastingEnabled: (isFastingEnabled) => set({ isFastingEnabled }),
             setFastingWindow: (fastingWindowStart, fastingWindowEnd) => set({ fastingWindowStart, fastingWindowEnd }),
+
+            addPlan: (plan) => set((state) => ({
+                customPlans: [...(state.customPlans || []), plan],
+                selectedPlanId: plan.id // Auto-select new plan? Sure.
+            })),
+
+            updatePlan: (updatedPlan) => set((state) => ({
+                customPlans: (state.customPlans || []).map(p => p.id === updatedPlan.id ? updatedPlan : p)
+            })),
+
+            deletePlan: (id) => set((state) => {
+                const newPlans = (state.customPlans || []).filter(p => p.id !== id);
+                return {
+                    customPlans: newPlans,
+                    selectedPlanId: state.selectedPlanId === id ? 'hormonal-harmony' : state.selectedPlanId
+                };
+            }),
         }),
         {
             name: 'fasting-cycles-storage',

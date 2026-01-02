@@ -1,14 +1,13 @@
 import { useSettingsStore } from '../store/useSettingsStore';
 import { DEFAULT_PLANS } from '../data/defaultPlans';
+import PlanManager from './PlanManager';
 
 const Settings = ({ onClose }: { onClose: () => void }) => {
     const {
         cycleLength,
         periodLength,
-        selectedPlanId,
         setCycleLength,
         setPeriodLength,
-        setSelectedPlanId
     } = useSettingsStore();
 
     return (
@@ -31,7 +30,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                 <button onClick={onClose} style={{ fontSize: '1.5rem', background: 'transparent' }}>×</button>
             </header>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)', overflowY: 'auto' }}>
 
                 {/* Cycle Settings */}
                 <section>
@@ -77,53 +76,32 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                     </div>
                 </section>
 
-                {/* Plan Selection */}
+                {/* Fasting Plan Management */}
                 <section>
-                    <h3 style={{ marginBottom: 'var(--space-md)', fontSize: '1rem', color: 'var(--c-text-muted)' }}>Fasting Plan</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                        {DEFAULT_PLANS.map(plan => (
-                            <div
-                                key={plan.id}
-                                onClick={() => setSelectedPlanId(plan.id)}
-                                style={{
-                                    background: 'var(--c-surface)',
-                                    padding: 'var(--space-md)',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: selectedPlanId === plan.id ? '2px solid var(--c-primary)' : '2px solid transparent',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                <div style={{ fontWeight: 600, marginBottom: '4px' }}>{plan.name}</div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--c-text-muted)' }}>{plan.description}</div>
-                            </div>
-                        ))}
-                    </div>
+                    <PlanManager />
                 </section>
 
-                {/* Danger Zone */}
-                <section style={{ marginTop: 'auto' }}>
-                    <button
-                        onClick={() => {
-                            if (confirm('Are you sure you want to reset all data?')) {
-                                useSettingsStore.getState().setLastPeriodStart(null);
-                                onClose();
-                            }
-                        }}
-                        style={{
-                            width: '100%',
-                            padding: 'var(--space-md)',
-                            background: 'transparent',
-                            border: '1px solid #ff6b6b',
-                            color: '#ff6b6b',
-                            borderRadius: 'var(--radius-md)',
-                            fontWeight: 600,
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Reset All Data
-                    </button>
-                </section>
+                <div
+                    onClick={() => {
+                        if (confirm("Are you sure? This will delete all history.")) {
+                            localStorage.removeItem('fasting-cycles-storage');
+                            window.location.reload();
+                        }
+                    }}
+                    style={{
+                        marginTop: 'var(--space-xl)',
+                        marginBottom: 'var(--space-xl)',
+                        textAlign: 'center',
+                        color: 'red',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        padding: '10px',
+                        border: '1px solid red',
+                        borderRadius: 'var(--radius-md)'
+                    }}
+                >
+                    Reset All Data
+                </div>
 
             </div>
         </div>

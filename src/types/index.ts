@@ -27,4 +27,5 @@ export interface UserSettings {
   cycleHistory: CycleEntry[]; // Array of CycleEntry objects
   selectedPlanId: string;
   isFastingEnabled: boolean;
+  customPlans: Plan[];
 }
