@@ -37,23 +37,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                     <h3 style={{ marginBottom: 'var(--space-md)', fontSize: '1rem', color: 'var(--c-text-muted)' }}>Cycle Details</h3>
                     <div style={{ background: 'var(--c-surface)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)' }}>
 
-                        <div style={{ marginBottom: 'var(--space-md)' }}>
-                            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: '0.9rem' }}>Log New Period</label>
-                            <input
-                                type="date"
-                                onChange={(e) => {
-                                    if (e.target.value) {
-                                        if (confirm(`Log period starting on ${e.target.value}? This will update your history.`)) {
-                                            useSettingsStore.getState().logPeriod(e.target.value);
-                                        }
-                                    }
-                                }}
-                                style={{ width: '100%', padding: 'var(--space-sm)', borderRadius: 'var(--radius-md)', border: '1px solid #ddd' }}
-                            />
-                            <p style={{ fontSize: '0.8rem', color: 'var(--c-text-muted)', marginTop: '4px' }}>
-                                Entering a new date will update your average cycle length.
-                            </p>
-                        </div>
+
 
                         <div style={{ marginBottom: 'var(--space-md)' }}>
                             <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: '0.9rem' }}>Cycle Length (Days)</label>

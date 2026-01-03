@@ -17,7 +17,7 @@ import { useSettingsStore } from '../store/useSettingsStore';
 import { DEFAULT_PLANS } from '../data/defaultPlans';
 
 const Calendar = () => {
-    const { lastPeriodStart, cycleLength, selectedPlanId } = useSettingsStore();
+    const { lastPeriodStart, cycleLength, selectedPlanId, periodLength = 5 } = useSettingsStore();
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
     const plan = DEFAULT_PLANS.find(p => p.id === selectedPlanId) || DEFAULT_PLANS[0];
@@ -70,9 +70,8 @@ const Calendar = () => {
         const startDate = parseISO(lastPeriodStart);
         const diff = differenceInCalendarDays(date, startDate);
 
-        // Simple cycle calculation (future work: handle irregular cycles)
+        // Simple cycle calculation
         const cycleDay = (diff % cycleLength) + 1;
-        // Adjust for negative diffs (past dates before start) - actually mostly relevant for cycle mapping
         const adjustedCycleDay = cycleDay <= 0 ? cycleDay + cycleLength : cycleDay;
 
         // Find rule
@@ -81,32 +80,34 @@ const Calendar = () => {
             return adjustedCycleDay >= r.dayStart && adjustedCycleDay <= end;
         });
 
-        let backgroundColor = 'transparent';
-        let borderColor = 'transparent';
+        // 1. Determine Background (Period vs Non-Period)
+        // Check strict period days from user setting
+        const isPeriod = adjustedCycleDay >= 1 && adjustedCycleDay <= periodLength;
+        const backgroundColor = isPeriod ? 'var(--c-period-bg)' : 'var(--c-neutral-bg)';
+        const color = 'var(--c-text-main)'; // Always dark text properly
+
+        // 2. Determine Border (Fasting Rules)
+        // Default transparent
+        let border = '2px solid transparent';
+        let showSlash = false;
 
         if (rule) {
             switch (rule.type) {
                 case 'NO_FASTING':
-                    backgroundColor = 'var(--c-accent)'; // Example: Pink/Red for period/luteal end
+                    border = '3px solid var(--c-no-fasting-border)'; // Darker Gray
+                    showSlash = true;
                     break;
                 case 'LIMIT_HOURS':
-                    backgroundColor = 'var(--c-primary-light)';
+                    border = '3px solid var(--c-black-border)'; // Thick black
+                    showSlash = false; // Gentle limit is just border
                     break;
                 case 'STANDARD':
-                    backgroundColor = 'transparent';
-                    borderColor = 'var(--c-primary)';
+                    border = '3px solid var(--c-power-border)'; // Bright red
                     break;
             }
         }
 
-        // Highlight period days specifically (approx 1-5)
-        const isPeriod = adjustedCycleDay >= 1 && adjustedCycleDay <= (useSettingsStore.getState().periodLength || 5);
-        if (isPeriod) {
-            backgroundColor = 'var(--c-accent)';
-            borderColor = 'transparent';
-        }
-
-        return { cycleDay: adjustedCycleDay, rule, backgroundColor, borderColor, isPeriod };
+        return { cycleDay: adjustedCycleDay, rule, backgroundColor, border, showSlash, color };
     };
 
     const cells = () => {
@@ -121,8 +122,12 @@ const Calendar = () => {
         return (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 'var(--space-xs)' }}>
                 {dayArray.map((date, i) => {
-                    const { backgroundColor, borderColor, isPeriod } = getDayInfo(date);
                     const isSelectedMonth = isSameMonth(date, monthStart);
+
+                    // If not selected month, just white/transparent background, no circle
+                    const dayInfo = isSelectedMonth ? getDayInfo(date) : {};
+                    const { backgroundColor, border, showSlash, color } = dayInfo;
+
                     const isToday = isSameDay(date, new Date());
 
                     return (
@@ -135,24 +140,24 @@ const Calendar = () => {
                             position: 'relative',
                             borderRadius: '50%',
                             background: isSelectedMonth ? backgroundColor : 'transparent',
-                            border: `2px solid ${isToday ? 'var(--c-text-main)' : borderColor}`,
-                            opacity: isSelectedMonth ? (isPeriod ? 0.8 : (backgroundColor !== 'transparent' ? 0.6 : 1)) : 0.2, // increased opacity for visibility
-                            color: isSelectedMonth ? 'inherit' : 'var(--c-text-muted)',
-                            fontSize: '0.9rem',
+                            border: isSelectedMonth ? border : 'none',
+                            opacity: 1, // Full opacity for visual clarity as requested
+                            color: isSelectedMonth ? color : 'var(--c-text-muted)',
+                            fontSize: '1.2rem', // Increased font size as requested
                             cursor: 'pointer',
-                            position: 'relative'
+                            fontWeight: isToday ? 'bold' : 'normal'
                         }}>
-                            {getDayInfo(date).rule?.type === 'NO_FASTING' && isSelectedMonth && (
+                            {/* Diagonal Slash for NO_FASTING */}
+                            {showSlash && (
                                 <div style={{
                                     position: 'absolute',
                                     width: '100%',
-                                    height: '2px',
-                                    background: 'var(--c-text-muted)',
+                                    height: '3px', /* Matching thick border */
+                                    background: 'var(--c-no-fasting-border)', // Matching new gray color
                                     transform: 'rotate(-45deg)',
-                                    opacity: 0.5
                                 }} />
                             )}
-                            <span style={{ zIndex: 1 }}>{format(date, dateFormat)}</span>
+                            <span style={{ zIndex: 1, textDecoration: isToday ? 'underline' : 'none' }}>{format(date, dateFormat)}</span>
                         </div>
                     );
                 })}
@@ -180,18 +185,21 @@ const Calendar = () => {
                 flexWrap: 'wrap'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--c-accent)' }} /> Period
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--c-period-bg)' }} /> Period
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--c-primary-light)' }} /> Gentle Limit
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--c-neutral-bg)' }} /> Non-Period
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, background: 'var(--c-accent)', borderRadius: '50%', position: 'relative' }}>
-                        <div style={{ width: '100%', height: '1px', background: 'currentcolor', transform: 'rotate(-45deg)' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, border: '3px solid var(--c-no-fasting-border)', borderRadius: '50%', position: 'relative' }}>
+                        <div style={{ width: '100%', height: '3px', background: 'var(--c-no-fasting-border)', transform: 'rotate(-45deg)' }} />
                     </div> No Fasting
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid var(--c-primary)' }} /> Power
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: '3px solid var(--c-black-border)' }} /> Gentle
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: '3px solid var(--c-power-border)' }} /> Power
                 </div>
             </div>
         </div>

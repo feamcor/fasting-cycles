@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useCycleCalculator } from '../hooks/useCycleCalculator';
 import { useSettingsStore } from '../store/useSettingsStore';
 import Calendar from './Calendar';
@@ -7,8 +8,13 @@ const Dashboard = () => {
     const status = useCycleCalculator();
     const {
         fastingWindowStart,
-        fastingWindowEnd
+        fastingWindowEnd,
+        cycleHistory
     } = useSettingsStore();
+
+    // State for Reality Check Date Selection
+    const [loggingMode, setLoggingMode] = useState<'start' | 'end' | null>(null);
+    const [selectedDate, setSelectedDate] = useState<string>('');
 
     if (!status) return null;
 
@@ -40,6 +46,42 @@ const Dashboard = () => {
     };
 
     const advice = getAdvice();
+
+    // Reality Check Logic
+    const latest = cycleHistory[0];
+    const isPeriodActive = latest && !latest.endDate;
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    const handleStartClick = () => {
+        setLoggingMode(isPeriodActive ? 'end' : 'start');
+        setSelectedDate(todayStr);
+    };
+
+    const handleConfirmLog = () => {
+        if (!selectedDate) return;
+
+        if (loggingMode === 'start') {
+            useSettingsStore.getState().logPeriodStart(selectedDate);
+        } else {
+            useSettingsStore.getState().logPeriodEnd(selectedDate);
+        }
+        setLoggingMode(null);
+    };
+
+    const getMinDate = () => {
+        if (loggingMode === 'end' && latest) {
+            return latest.startDate;
+        }
+        if (loggingMode === 'start' && latest && latest.endDate) {
+            // Technically should be > last end date, but input min is inclusive.
+            // Let's allow same day (maybe morning/night difference? unlikely but safe).
+            // Better UX: next day.
+            const nextDay = new Date(latest.endDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            return nextDay.toISOString().split('T')[0];
+        }
+        return undefined;
+    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
@@ -89,64 +131,92 @@ const Dashboard = () => {
                 borderRadius: 'var(--radius-lg)',
                 boxShadow: 'var(--shadow-sm)',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
+                flexDirection: 'column',
+                gap: 'var(--space-sm)'
             }}>
-                <div>
-                    <h3 style={{ fontSize: '1rem', marginBottom: '4px' }}>Reality Check</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>Is your body telling you something different?</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h3 style={{ fontSize: '1rem', marginBottom: '4px' }}>Reality Check</h3>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>Is your body telling you something different?</p>
+                    </div>
+
+                    {!loggingMode && (
+                        <button
+                            onClick={handleStartClick}
+                            style={{
+                                background: isPeriodActive ? 'var(--c-surface)' : 'var(--c-accent)',
+                                border: isPeriodActive ? '2px solid var(--c-text-main)' : 'none',
+                                color: 'var(--c-text-main)',
+                                padding: '8px 16px',
+                                borderRadius: '20px',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {isPeriodActive ? 'End Period' : 'Start Period'}
+                        </button>
+                    )}
                 </div>
 
-                {(() => {
-                    const history = useSettingsStore.getState().cycleHistory;
-                    const latest = history[0]; // Latest entry
-                    const todayStr = new Date().toISOString().split('T')[0];
-
-                    const isPeriodActive = latest && !latest.endDate;
-
-                    if (isPeriodActive) {
-                        return (
-                            <button onClick={() => {
-                                if (confirm('Did your period end today?')) {
-                                    useSettingsStore.getState().logPeriodEnd(todayStr);
-                                }
-                            }} style={{
-                                background: 'var(--c-surface)',
-                                border: '2px solid var(--c-text-main)',
-                                color: 'var(--c-text-main)',
-                                padding: '8px 16px',
-                                borderRadius: '20px',
-                                fontWeight: 600,
-                                cursor: 'pointer'
-                            }}>
-                                End Period
+                {loggingMode && (
+                    <div style={{
+                        marginTop: 'var(--space-sm)',
+                        padding: 'var(--space-sm)',
+                        background: 'var(--c-bg-app)',
+                        borderRadius: 'var(--radius-md)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 'var(--space-sm)'
+                    }}>
+                        <p style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+                            {loggingMode === 'start' ? 'When did it start?' : 'When did it end?'}
+                        </p>
+                        <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                max={todayStr}
+                                min={getMinDate()}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                style={{
+                                    flex: 1,
+                                    padding: '8px',
+                                    borderRadius: 'var(--radius-md)',
+                                    border: '1px solid #ddd'
+                                }}
+                            />
+                            <button
+                                onClick={handleConfirmLog}
+                                style={{
+                                    background: 'var(--c-primary)',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '8px 16px',
+                                    borderRadius: 'var(--radius-md)',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Confirm
                             </button>
-                        );
-                    } else {
-                        return (
-                            <button onClick={() => {
-                                if (confirm('Did your period start today?')) {
-                                    useSettingsStore.getState().logPeriodStart(todayStr);
-                                }
-                            }} style={{
-                                background: 'var(--c-accent)',
-                                border: 'none',
-                                color: 'var(--c-text-main)',
-                                padding: '8px 16px',
-                                borderRadius: '20px',
-                                fontWeight: 600,
-                                cursor: 'pointer'
-                            }}>
-                                Start Period
+                            <button
+                                onClick={() => setLoggingMode(null)}
+                                style={{
+                                    background: 'transparent',
+                                    color: 'var(--c-text-muted)',
+                                    border: '1px solid #ddd',
+                                    padding: '8px 16px',
+                                    borderRadius: 'var(--radius-md)',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
                             </button>
-                        );
-                    }
-                })()}
+                        </div>
+                    </div>
+                )}
             </div>
 
             <Calendar />
-
-
 
         </div>
     );
