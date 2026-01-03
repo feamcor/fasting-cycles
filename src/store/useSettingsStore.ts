@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { UserSettings, CycleEntry, Plan } from '../types';
+import type { UserSettings, CycleEntry, Plan, FastingTypeDef } from '../types';
 
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 
@@ -20,9 +20,10 @@ interface SettingsState extends UserSettings {
     setFastingWindow: (start: string, end: string) => void;
 
     // Plan Management
-    addPlan: (plan: Plan) => void;
-    updatePlan: (plan: Plan) => void;
-    deletePlan: (id: string) => void;
+    // Fasting Type Management
+    addFastingType: (type: FastingTypeDef) => void;
+    deleteFastingType: (id: string) => void;
+    customFastingTypes: FastingTypeDef[]; // Initialize in state
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -35,6 +36,7 @@ export const useSettingsStore = create<SettingsState>()(
             selectedPlanId: 'hormonal-harmony',
             isFastingEnabled: true,
             customPlans: [],
+            customFastingTypes: [], // Initial state
 
             fastingWindowStart: '20:00', // Start fasting at 8 PM
             fastingWindowEnd: '12:00',   // Eat at 12 PM (16:8 by default)
@@ -162,6 +164,14 @@ export const useSettingsStore = create<SettingsState>()(
                     selectedPlanId: state.selectedPlanId === id ? 'hormonal-harmony' : state.selectedPlanId
                 };
             }),
+
+            addFastingType: (type) => set((state) => ({
+                customFastingTypes: [...(state.customFastingTypes || []), type]
+            })),
+
+            deleteFastingType: (id) => set((state) => ({
+                customFastingTypes: (state.customFastingTypes || []).filter(t => t.id !== id)
+            })),
         }),
         {
             name: 'fasting-cycles-storage',

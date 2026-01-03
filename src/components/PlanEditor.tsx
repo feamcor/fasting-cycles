@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import type { Plan, FastingRule, FastingType } from '../types';
+import { useState } from 'react';
+import type { Plan, FastingRule } from '../types';
 
 interface PlanEditorProps {
     initialPlan?: Plan;
@@ -8,7 +8,10 @@ interface PlanEditorProps {
     readOnly?: boolean;
 }
 
+import { useSettingsStore } from '../store/useSettingsStore';
+
 const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEditorProps) => {
+    const { customFastingTypes = [] } = useSettingsStore();
     const [name, setName] = useState(initialPlan?.name || '');
     const [description, setDescription] = useState(initialPlan?.description || '');
     const [rules, setRules] = useState<FastingRule[]>(initialPlan?.rules || []);
@@ -116,9 +119,18 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                                 onChange={e => updateRule(i, 'type', e.target.value)}
                                 style={{ width: '100%', padding: '4px' }}
                             >
-                                <option value="STANDARD">Standard</option>
-                                <option value="LIMIT_HOURS">Limit Hours</option>
-                                <option value="NO_FASTING">No Fasting</option>
+                                <optgroup label="Built-in">
+                                    <option value="STANDARD">Standard</option>
+                                    <option value="LIMIT_HOURS">Limit Hours (Flexible)</option>
+                                    <option value="NO_FASTING">No Fasting</option>
+                                </optgroup>
+                                {customFastingTypes.length > 0 && (
+                                    <optgroup label="My Custom Types">
+                                        {customFastingTypes.map(t => (
+                                            <option key={t.id} value={t.id}>{t.name} ({t.fastingHours}h)</option>
+                                        ))}
+                                    </optgroup>
+                                )}
                             </select>
                         </div>
 
@@ -132,6 +144,13 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                                     onChange={e => updateRule(i, 'allowedHours', Number(e.target.value))}
                                     style={{ width: '100%', padding: '4px' }}
                                 />
+                            </div>
+                        )}
+
+                        {/* Show info for custom types */}
+                        {customFastingTypes.find(t => t.id === rule.type) && (
+                            <div style={{ marginBottom: '8px', fontSize: '0.8rem', color: 'var(--c-text-muted)', background: '#f5f5f5', padding: '4px', borderRadius: '4px' }}>
+                                ℹ️ {customFastingTypes.find(t => t.id === rule.type)?.description}
                             </div>
                         )}
 

@@ -41,6 +41,15 @@ const Dashboard = () => {
                     text: `Standard fasting window: Stop eating at ${fastingWindowStart}, Start at ${fastingWindowEnd}.`
                 };
             default:
+                // Check if it's a custom type
+                const state = useSettingsStore.getState();
+                const customType = state.customFastingTypes?.find(t => t.id === activeRule.type);
+                if (customType) {
+                    return {
+                        title: customType.name,
+                        text: `${customType.fastingHours}h Fasting / ${customType.eatingHours}h Eating. ${customType.description || ''}`
+                    };
+                }
                 return { title: 'Flow', text: activeRule.description || '' };
         }
     };

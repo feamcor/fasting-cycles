@@ -1,10 +1,20 @@
-export type FastingType = 'NO_FASTING' | 'LIMIT_HOURS' | 'STANDARD' | 'CUSTOM';
+// Defines the configuration for a fasting type (e.g., 16:8, 20:4)
+export interface FastingTypeDef {
+  id: string; // 'STANDARD', 'NO_FASTING' or custom UUID
+  name: string;
+  fastingHours: number;
+  eatingHours: number;
+  description?: string;
+  isSystem?: boolean; // Pre-defined types that can't be deleted
+}
+
+export type FastingType = 'NO_FASTING' | 'LIMIT_HOURS' | 'STANDARD' | string; // Allow custom IDs
 
 export interface FastingRule {
   dayStart: number;
   dayEnd: number | 'END';
   type: FastingType;
-  allowedHours?: number; // e.g., 15 for 15-hour limit
+  allowedHours?: number; // e.g., 15 for 15-hour limit (Specific to LIMIT_HOURS type essentially)
   description?: string;
 }
 
@@ -28,4 +38,5 @@ export interface UserSettings {
   selectedPlanId: string;
   isFastingEnabled: boolean;
   customPlans: Plan[];
+  customFastingTypes: FastingTypeDef[]; // User-defined fasting types
 }
