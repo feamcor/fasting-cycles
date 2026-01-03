@@ -16,8 +16,7 @@ export const DEFAULT_PLANS: Plan[] = [
                 dayStart: 11,
                 dayEnd: 15,
                 type: 'LIMIT_HOURS',
-                allowedHours: 15, // Max 15 hours fasting
-                description: 'Ovulation: Limit fasting stress. Max 15 hours.'
+                description: 'Ovulation: Limit fasting stress. Gentle Limit (12:12).'
             },
             {
                 dayStart: 16,

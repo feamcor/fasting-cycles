@@ -121,31 +121,20 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                             >
                                 <optgroup label="Built-in">
                                     <option value="STANDARD">Standard</option>
-                                    <option value="LIMIT_HOURS">Limit Hours (Flexible)</option>
+                                    <option value="LIMIT_HOURS">Gentle Limit (12:12)</option>
                                     <option value="NO_FASTING">No Fasting</option>
                                 </optgroup>
                                 {customFastingTypes.length > 0 && (
                                     <optgroup label="My Custom Types">
                                         {customFastingTypes.map(t => (
-                                            <option key={t.id} value={t.id}>{t.name} ({t.fastingHours}h)</option>
+                                            <option key={t.id} value={t.id}>{t.name} ({t.windowDuration || 24}h)</option>
                                         ))}
                                     </optgroup>
                                 )}
                             </select>
                         </div>
 
-                        {rule.type === 'LIMIT_HOURS' && (
-                            <div style={{ marginBottom: '8px' }}>
-                                <label style={{ fontSize: '0.8rem' }}>Max Hours</label>
-                                <input
-                                    type="number"
-                                    value={rule.allowedHours || 12}
-                                    disabled={readOnly}
-                                    onChange={e => updateRule(i, 'allowedHours', Number(e.target.value))}
-                                    style={{ width: '100%', padding: '4px' }}
-                                />
-                            </div>
-                        )}
+
 
                         {/* Show info for custom types */}
                         {customFastingTypes.find(t => t.id === rule.type) && (

@@ -20,6 +20,10 @@ interface SettingsState extends UserSettings {
     setFastingWindow: (start: string, end: string) => void;
 
     // Plan Management
+    addPlan: (plan: Plan) => void;
+    updatePlan: (plan: Plan) => void;
+    deletePlan: (id: string) => void;
+
     // Fasting Type Management
     addFastingType: (type: FastingTypeDef) => void;
     deleteFastingType: (id: string) => void;
@@ -45,7 +49,7 @@ export const useSettingsStore = create<SettingsState>()(
             setPeriodLength: (periodLength) => set({ periodLength }),
 
             // Legacy setter acting as a reset/initial set
-            setLastPeriodStart: (lastPeriodStart) => set((state) => {
+            setLastPeriodStart: (lastPeriodStart) => set(() => {
                 // Reset history if using this setter manually
                 if (!lastPeriodStart) return { lastPeriodStart, cycleHistory: [] };
                 const newEntry: CycleEntry = { startDate: lastPeriodStart };
@@ -148,16 +152,16 @@ export const useSettingsStore = create<SettingsState>()(
             setFastingEnabled: (isFastingEnabled) => set({ isFastingEnabled }),
             setFastingWindow: (fastingWindowStart, fastingWindowEnd) => set({ fastingWindowStart, fastingWindowEnd }),
 
-            addPlan: (plan) => set((state) => ({
+            addPlan: (plan: Plan) => set((state) => ({
                 customPlans: [...(state.customPlans || []), plan],
                 selectedPlanId: plan.id // Auto-select new plan? Sure.
             })),
 
-            updatePlan: (updatedPlan) => set((state) => ({
+            updatePlan: (updatedPlan: Plan) => set((state) => ({
                 customPlans: (state.customPlans || []).map(p => p.id === updatedPlan.id ? updatedPlan : p)
             })),
 
-            deletePlan: (id) => set((state) => {
+            deletePlan: (id: string) => set((state) => {
                 const newPlans = (state.customPlans || []).filter(p => p.id !== id);
                 return {
                     customPlans: newPlans,

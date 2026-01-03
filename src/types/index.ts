@@ -1,11 +1,18 @@
 // Defines the configuration for a fasting type (e.g., 16:8, 20:4)
+// Defines the configuration for a fasting type
+export interface FastingSlot {
+  start: string; // HH:mm relative to window start (e.g., "20:00")
+  end: string;   // HH:mm relative to window start
+  dayOffset: number; // 0 for same day, 1 for next day (relative to window start)
+}
+
 export interface FastingTypeDef {
   id: string; // 'STANDARD', 'NO_FASTING' or custom UUID
   name: string;
-  fastingHours: number;
-  eatingHours: number;
+  windowDuration: number; // Hours (e.g., 24, 48)
+  slots: FastingSlot[];   // Fasting periods
   description?: string;
-  isSystem?: boolean; // Pre-defined types that can't be deleted
+  isSystem?: boolean;
 }
 
 export type FastingType = 'NO_FASTING' | 'LIMIT_HOURS' | 'STANDARD' | string; // Allow custom IDs
@@ -14,7 +21,6 @@ export interface FastingRule {
   dayStart: number;
   dayEnd: number | 'END';
   type: FastingType;
-  allowedHours?: number; // e.g., 15 for 15-hour limit (Specific to LIMIT_HOURS type essentially)
   description?: string;
 }
 

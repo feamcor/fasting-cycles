@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { useCycleCalculator } from '../hooks/useCycleCalculator';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { BUILT_IN_FASTING_TYPES } from '../data/fastingTypes';
 import Calendar from './Calendar';
 
 
 const Dashboard = () => {
     const status = useCycleCalculator();
     const {
-        fastingWindowStart,
-        fastingWindowEnd,
         cycleHistory
     } = useSettingsStore();
 
@@ -20,38 +19,51 @@ const Dashboard = () => {
 
     const { currentCycleDay, activeRule, planName } = status;
 
-    // Determine advice based on rule
+    // ... inside Dashboard
+
     const getAdvice = () => {
         if (!activeRule) return { title: 'Rest', text: 'No specific rule for today.' };
 
-        switch (activeRule.type) {
-            case 'NO_FASTING':
-                return {
-                    title: 'Nourish',
-                    text: 'Focus on nutrient-dense foods. No fasting recommended.'
-                };
-            case 'LIMIT_HOURS':
-                return {
-                    title: 'Gentle Fast',
-                    text: `Limit fasting to ${activeRule.allowedHours} hours max to support ovulation.`
-                };
-            case 'STANDARD':
-                return {
-                    title: 'Power Fast',
-                    text: `Standard fasting window: Stop eating at ${fastingWindowStart}, Start at ${fastingWindowEnd}.`
-                };
-            default:
-                // Check if it's a custom type
-                const state = useSettingsStore.getState();
-                const customType = state.customFastingTypes?.find(t => t.id === activeRule.type);
-                if (customType) {
-                    return {
-                        title: customType.name,
-                        text: `${customType.fastingHours}h Fasting / ${customType.eatingHours}h Eating. ${customType.description || ''}`
-                    };
-                }
-                return { title: 'Flow', text: activeRule.description || '' };
+        const state = useSettingsStore.getState();
+        const allTypes = [...BUILT_IN_FASTING_TYPES, ...(state.customFastingTypes || [])];
+        const typeDef = allTypes.find(t => t.id === activeRule.type);
+
+        if (!typeDef) return { title: 'Flow', text: activeRule.description || '' };
+
+        if (!typeDef.slots || typeDef.slots.length === 0) {
+            return { title: 'Nourish', text: 'No scheduled fasting. Focus on nutrient-dense foods.' };
         }
+
+        // Calculate Window Pattern
+        // Assuming user started the plan aligned with their cycle? 
+        // Actually, "Day 1 20:00" usually means "Every day 20:00" for 24h windows.
+        // For 48h windows, we need to know if today is Day 1 or Day 2.
+        // We'll calculate offset from Cycle Start? 
+        // activeRule.dayStart is the cycle day this rule started.
+        // currentCycleDay is the global cycle day.
+        // So days into this rule = currentCycleDay - activeRule.dayStart.
+        // windowDay = (daysIntoRule) % (windowDuration / 24).
+
+
+        const cycleDays = Math.ceil((typeDef.windowDuration || 24) / 24);
+
+        // Find applicable slots for TODAY (currentWindowDay)
+        // Note: Slots are stored as "D:HH:mm". D is 0-based.
+        // We want to show "Fasting: 20:00 - 12:00" etc.
+
+
+
+        const slotDesc = (typeDef.slots || []).map(s => {
+            const [d1, h1, m1] = s.start.split(':');
+            const [_d2, h2, m2] = s.end.split(':');
+            const dayLabel = cycleDays > 1 ? `Day ${parseInt(d1) + 1} ` : '';
+            return `${dayLabel}${h1}:${m1} - ${h2}:${m2}`;
+        }).join(', ');
+
+        return {
+            title: typeDef.name,
+            text: `${typeDef.description || ''} Pattern: ${slotDesc}`
+        };
     };
 
     const advice = getAdvice();

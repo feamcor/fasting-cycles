@@ -1,5 +1,5 @@
 import { useSettingsStore } from '../store/useSettingsStore';
-import { DEFAULT_PLANS } from '../data/defaultPlans';
+
 import PlanManager from './PlanManager';
 import FastingTypeManager from './FastingTypeManager';
 
