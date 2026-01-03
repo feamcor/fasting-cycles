@@ -35,6 +35,10 @@ export interface Plan {
 export interface CycleEntry {
   startDate: string; // ISO Date
   endDate?: string;  // ISO Date (optional, if not yet ended)
+  planSnapshot?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface UserSettings {

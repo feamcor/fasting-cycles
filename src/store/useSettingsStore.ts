@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UserSettings, CycleEntry, Plan, FastingTypeDef } from '../types';
+import { DEFAULT_PLANS } from '../data/defaultPlans';
 
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 
@@ -73,7 +74,19 @@ export const useSettingsStore = create<SettingsState>()(
                     return;
                 }
 
-                const newEntry: CycleEntry = { startDate: date };
+                // Resolve Plan Snapshot
+                const activePlanId = state.selectedPlanId;
+                const builtIn = DEFAULT_PLANS.find(p => p.id === activePlanId);
+                const custom = state.customPlans?.find(p => p.id === activePlanId);
+                const activePlanName = builtIn?.name || custom?.name || 'Unknown Plan';
+
+                const newEntry: CycleEntry = {
+                    startDate: date,
+                    planSnapshot: {
+                        id: activePlanId,
+                        name: activePlanName
+                    }
+                };
                 // Add to history, dedupe by startDate
                 const newHistory = [newEntry, ...state.cycleHistory]
                     .filter((entry, i, self) => self.findIndex(e => e.startDate === entry.startDate) === i)

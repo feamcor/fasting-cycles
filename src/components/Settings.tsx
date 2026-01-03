@@ -3,6 +3,7 @@ import { useSettingsStore } from '../store/useSettingsStore';
 
 import PlanManager from './PlanManager';
 import FastingTypeManager from './FastingTypeManager';
+import { generateMockHistory } from '../utils/seedData';
 
 const Settings = ({ onClose }: { onClose: () => void }) => {
     const {
@@ -21,6 +22,12 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
         // Optional: reload to ensure all states are clean, but resetAll should handle it.
         // But for a "hard reset" feel, reload is safer to clear any local component state too.
         window.location.reload();
+    };
+
+    const handleSeedData = () => {
+        const mockHistory = generateMockHistory();
+        useSettingsStore.setState({ cycleHistory: mockHistory, lastPeriodStart: mockHistory[0]?.startDate || null });
+        alert('Added 1 year of test data!');
     };
 
     return (
@@ -69,6 +76,13 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                 <hr style={{ border: '0', borderTop: '1px solid #eee', margin: 0 }} />
 
                 <FastingTypeManager />
+
+                <div style={{ padding: 'var(--space-md)', background: '#f0f8ff', borderRadius: 'var(--radius-md)', border: '1px dashed #add8e6', textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 var(--space-sm) 0', fontSize: '0.9rem', color: '#0066cc' }}>Dev Tools</p>
+                    <button onClick={handleSeedData} style={{ background: '#0066cc', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                        🌱 Seed 1 Year Test Data
+                    </button>
+                </div>
 
                 {!showResetConfirm ? (
                     <div
