@@ -75,7 +75,7 @@ const PlanManager = () => {
                             <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px' }}>
                                 {!isDefault && (
                                     <>
-                                        <button onClick={() => setEditingPlan(plan)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>✎</button>
+                                        <button onClick={() => setEditingPlan(plan)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--c-primary)', textDecoration: 'underline' }}>Edit</button>
                                         <button onClick={() => {
                                             if (confirm('Delete this plan?')) deletePlan(plan.id);
                                         }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'red' }}>×</button>

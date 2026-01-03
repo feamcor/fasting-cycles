@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
 
 import PlanManager from './PlanManager';
@@ -9,7 +10,18 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
         periodLength,
         setCycleLength,
         setPeriodLength,
+        resetAll
     } = useSettingsStore();
+
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+    const handleReset = () => {
+        resetAll();
+        setShowResetConfirm(false);
+        // Optional: reload to ensure all states are clean, but resetAll should handle it.
+        // But for a "hard reset" feel, reload is safer to clear any local component state too.
+        window.location.reload();
+    };
 
     return (
         <section style={{
@@ -58,27 +70,54 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
 
                 <FastingTypeManager />
 
-                <div
-                    onClick={() => {
-                        if (confirm("Are you sure? This will delete all history.")) {
-                            localStorage.removeItem('fasting-cycles-storage');
-                            window.location.reload();
-                        }
-                    }}
-                    style={{
+                {!showResetConfirm ? (
+                    <div
+                        onClick={() => setShowResetConfirm(true)}
+                        style={{
+                            marginTop: 'var(--space-xl)',
+                            marginBottom: 'var(--space-xl)',
+                            textAlign: 'center',
+                            color: 'red',
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            padding: '10px',
+                            border: '1px solid red',
+                            borderRadius: 'var(--radius-md)'
+                        }}
+                    >
+                        Reset All Data
+                    </div>
+                ) : (
+                    <div style={{
                         marginTop: 'var(--space-xl)',
                         marginBottom: 'var(--space-xl)',
-                        textAlign: 'center',
-                        color: 'red',
-                        fontSize: '0.9rem',
-                        cursor: 'pointer',
-                        padding: '10px',
+                        background: '#fff0f0',
+                        padding: 'var(--space-md)',
+                        borderRadius: 'var(--radius-md)',
                         border: '1px solid red',
-                        borderRadius: 'var(--radius-md)'
-                    }}
-                >
-                    Reset All Data
-                </div>
+                        textAlign: 'center'
+                    }}>
+                        <p style={{ color: 'red', fontWeight: 'bold', marginBottom: '10px' }}>Are you sure? This will delete ALL custom plans, fasting types, and cycle history.</p>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                            <button
+                                onClick={handleReset}
+                                style={{
+                                    background: 'red', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer'
+                                }}
+                            >
+                                Yes, Clear Everything
+                            </button>
+                            <button
+                                onClick={() => setShowResetConfirm(false)}
+                                style={{
+                                    background: 'transparent', color: '#333', border: '1px solid #ccc', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </section>
     );

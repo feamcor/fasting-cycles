@@ -26,8 +26,12 @@ interface SettingsState extends UserSettings {
 
     // Fasting Type Management
     addFastingType: (type: FastingTypeDef) => void;
+    editFastingType: (type: FastingTypeDef) => void;
     deleteFastingType: (id: string) => void;
-    customFastingTypes: FastingTypeDef[]; // Initialize in state
+    customFastingTypes: FastingTypeDef[];
+
+    // Global Reset
+    resetAll: () => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -40,10 +44,10 @@ export const useSettingsStore = create<SettingsState>()(
             selectedPlanId: 'hormonal-harmony',
             isFastingEnabled: true,
             customPlans: [],
-            customFastingTypes: [], // Initial state
+            customFastingTypes: [],
 
-            fastingWindowStart: '20:00', // Start fasting at 8 PM
-            fastingWindowEnd: '12:00',   // Eat at 12 PM (16:8 by default)
+            fastingWindowStart: '20:00',
+            fastingWindowEnd: '12:00',
 
             setCycleLength: (cycleLength) => set({ cycleLength }),
             setPeriodLength: (periodLength) => set({ periodLength }),
@@ -59,7 +63,7 @@ export const useSettingsStore = create<SettingsState>()(
                 };
             }),
 
-            logPeriod: (date) => get().logPeriodStart(date), // Alias for backward compat if needed, or remove
+            logPeriod: (date) => get().logPeriodStart(date),
 
             logPeriodStart: (date) => {
                 const state = get();
@@ -108,8 +112,6 @@ export const useSettingsStore = create<SettingsState>()(
                     return;
                 }
 
-                // Attach end date to the most recent cycle start that is BEFORE this end date
-                // For simplicity, we usually update the latest cycle if it makes sense
                 const history = [...state.cycleHistory];
                 const targetEntryIndex = history.findIndex(entry => new Date(entry.startDate) <= new Date(date));
 
@@ -154,7 +156,7 @@ export const useSettingsStore = create<SettingsState>()(
 
             addPlan: (plan: Plan) => set((state) => ({
                 customPlans: [...(state.customPlans || []), plan],
-                selectedPlanId: plan.id // Auto-select new plan? Sure.
+                selectedPlanId: plan.id
             })),
 
             updatePlan: (updatedPlan: Plan) => set((state) => ({
@@ -173,9 +175,26 @@ export const useSettingsStore = create<SettingsState>()(
                 customFastingTypes: [...(state.customFastingTypes || []), type]
             })),
 
+            editFastingType: (updatedType) => set((state) => ({
+                customFastingTypes: (state.customFastingTypes || []).map(t => t.id === updatedType.id ? updatedType : t)
+            })),
+
             deleteFastingType: (id) => set((state) => ({
                 customFastingTypes: (state.customFastingTypes || []).filter(t => t.id !== id)
             })),
+
+            resetAll: () => set({
+                cycleLength: 28,
+                periodLength: 5,
+                lastPeriodStart: null,
+                cycleHistory: [],
+                selectedPlanId: 'hormonal-harmony',
+                isFastingEnabled: true,
+                customPlans: [],
+                customFastingTypes: [],
+                fastingWindowStart: '20:00',
+                fastingWindowEnd: '12:00'
+            }),
         }),
         {
             name: 'fasting-cycles-storage',
