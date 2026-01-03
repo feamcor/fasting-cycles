@@ -11,6 +11,7 @@ export interface FastingTypeDef {
   name: string;
   windowDuration: number; // Hours (e.g., 24, 48)
   slots: FastingSlot[];   // Fasting periods
+  color: string;
   description?: string;
   isSystem?: boolean;
 }

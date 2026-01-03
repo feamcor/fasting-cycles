@@ -7,6 +7,7 @@ export const BUILT_IN_FASTING_TYPES: FastingTypeDef[] = [
         windowDuration: 24,
         slots: [{ start: '0:20:00', end: '1:12:00', dayOffset: 1 }],
         isSystem: true,
+        color: 'var(--c-power-border)',
         description: 'Fasting from 20:00 to 12:00 next day.'
     },
     {
@@ -15,6 +16,7 @@ export const BUILT_IN_FASTING_TYPES: FastingTypeDef[] = [
         windowDuration: 24,
         slots: [{ start: '0:20:00', end: '1:08:00', dayOffset: 1 }],
         isSystem: true,
+        color: 'var(--c-black-border)',
         description: 'Fasting from 20:00 to 08:00 next day.'
     },
     {
@@ -23,6 +25,7 @@ export const BUILT_IN_FASTING_TYPES: FastingTypeDef[] = [
         windowDuration: 24,
         slots: [],
         isSystem: true,
+        color: 'var(--c-no-fasting-border)',
         description: 'No scheduled fasting.'
     }
 ];

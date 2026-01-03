@@ -15,12 +15,23 @@ import {
 } from 'date-fns';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { DEFAULT_PLANS } from '../data/defaultPlans';
+import { BUILT_IN_FASTING_TYPES } from '../data/fastingTypes';
 
 const Calendar = () => {
-    const { lastPeriodStart, cycleLength, selectedPlanId, periodLength = 5 } = useSettingsStore();
+    const { lastPeriodStart, cycleLength, selectedPlanId, periodLength = 5, customPlans, customFastingTypes } = useSettingsStore();
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
-    const plan = DEFAULT_PLANS.find(p => p.id === selectedPlanId) || DEFAULT_PLANS[0];
+    // Resolve Plan
+    const allPlans = [...DEFAULT_PLANS, ...(customPlans || [])];
+    const plan = allPlans.find(p => p.id === selectedPlanId) || DEFAULT_PLANS[0];
+
+    // Resolve Fasting Types
+    const allFastingTypes = [...BUILT_IN_FASTING_TYPES, ...(customFastingTypes || [])];
+
+    // Extract unique fasting types used in this plan for the legend
+    const planFastingTypes = Array.from(new Set(plan.rules.map(r => r.type)))
+        .map(typeId => allFastingTypes.find(t => t.id === typeId))
+        .filter((t): t is typeof allFastingTypes[0] => !!t);
 
     const header = () => {
         return (
@@ -81,29 +92,24 @@ const Calendar = () => {
         });
 
         // 1. Determine Background (Period vs Non-Period)
-        // Check strict period days from user setting
         const isPeriod = adjustedCycleDay >= 1 && adjustedCycleDay <= periodLength;
         const backgroundColor = isPeriod ? 'var(--c-period-bg)' : 'var(--c-neutral-bg)';
-        const color = 'var(--c-text-main)'; // Always dark text properly
+        const color = 'var(--c-text-main)';
 
         // 2. Determine Border (Fasting Rules)
-        // Default transparent
         let border = '2px solid transparent';
         let showSlash = false;
 
         if (rule) {
-            switch (rule.type) {
-                case 'NO_FASTING':
-                    border = '3px solid var(--c-no-fasting-border)'; // Darker Gray
+            const typeDef = allFastingTypes.find(t => t.id === rule.type);
+            if (typeDef) {
+                if (typeDef.color) {
+                    border = `3px solid ${typeDef.color}`;
+                }
+                // Special visual for NO_FASTING if desired, or just rely on color
+                if (typeDef.id === 'NO_FASTING') {
                     showSlash = true;
-                    break;
-                case 'LIMIT_HOURS':
-                    border = '3px solid var(--c-black-border)'; // Thick black
-                    showSlash = false; // Gentle limit is just border
-                    break;
-                case 'STANDARD':
-                    border = '3px solid var(--c-power-border)'; // Bright red
-                    break;
+                }
             }
         }
 
@@ -123,11 +129,8 @@ const Calendar = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 'var(--space-xs)' }}>
                 {dayArray.map((date, i) => {
                     const isSelectedMonth = isSameMonth(date, monthStart);
-
-                    // If not selected month, just white/transparent background, no circle
                     const dayInfo = isSelectedMonth ? getDayInfo(date) : {};
                     const { backgroundColor, border, showSlash, color } = dayInfo;
-
                     const isToday = isSameDay(date, new Date());
 
                     return (
@@ -141,9 +144,9 @@ const Calendar = () => {
                             borderRadius: '50%',
                             background: isSelectedMonth ? backgroundColor : 'transparent',
                             border: isSelectedMonth ? border : 'none',
-                            opacity: 1, // Full opacity for visual clarity as requested
+                            opacity: 1,
                             color: isSelectedMonth ? color : 'var(--c-text-muted)',
-                            fontSize: '1.2rem', // Increased font size as requested
+                            fontSize: '1.2rem',
                             cursor: 'pointer',
                             fontWeight: isToday ? 'bold' : 'normal'
                         }}>
@@ -152,8 +155,8 @@ const Calendar = () => {
                                 <div style={{
                                     position: 'absolute',
                                     width: '100%',
-                                    height: '3px', /* Matching thick border */
-                                    background: 'var(--c-no-fasting-border)', // Matching new gray color
+                                    height: '3px',
+                                    background: 'var(--c-no-fasting-border)',
                                     transform: 'rotate(-45deg)',
                                 }} />
                             )}
@@ -190,17 +193,31 @@ const Calendar = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--c-neutral-bg)' }} /> Non-Period
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, border: '3px solid var(--c-no-fasting-border)', borderRadius: '50%', position: 'relative' }}>
-                        <div style={{ width: '100%', height: '3px', background: 'var(--c-no-fasting-border)', transform: 'rotate(-45deg)' }} />
-                    </div> No Fasting
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: '3px solid var(--c-black-border)' }} /> Gentle
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: '3px solid var(--c-power-border)' }} /> Power
-                </div>
+
+                {planFastingTypes.map(type => (
+                    <div key={type.id} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div style={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: '50%',
+                            border: `3px solid ${type.color || 'transparent'}`,
+                            position: 'relative',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            {type.id === 'NO_FASTING' && (
+                                <div style={{
+                                    width: '100%',
+                                    height: '3px',
+                                    background: type.color || 'currentColor',
+                                    transform: 'rotate(-45deg)'
+                                }} />
+                            )}
+                        </div>
+                        {type.name}
+                    </div>
+                ))}
             </div>
         </div>
     );

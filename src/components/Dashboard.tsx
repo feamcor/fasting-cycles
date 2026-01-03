@@ -8,7 +8,8 @@ import Calendar from './Calendar';
 const Dashboard = () => {
     const status = useCycleCalculator();
     const {
-        cycleHistory
+        cycleHistory,
+        customFastingTypes
     } = useSettingsStore();
 
     // State for Reality Check Date Selection
@@ -24,8 +25,7 @@ const Dashboard = () => {
     const getAdvice = () => {
         if (!activeRule) return { title: 'Rest', text: 'No specific rule for today.' };
 
-        const state = useSettingsStore.getState();
-        const allTypes = [...BUILT_IN_FASTING_TYPES, ...(state.customFastingTypes || [])];
+        const allTypes = [...BUILT_IN_FASTING_TYPES, ...(customFastingTypes || [])];
         const typeDef = allTypes.find(t => t.id === activeRule.type);
 
         if (!typeDef) return { title: 'Flow', text: activeRule.description || '' };
