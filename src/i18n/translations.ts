@@ -112,6 +112,7 @@ export const translations = {
         durationStep: "Duration Step",
         removeRule: "Remove Rule",
         addCyclePhaseRule: "+ Add Cycle Phase Rule",
+        durationStepDays: "day(s)",
         close: "Close",
         savePlan: "Save Plan",
         noHistoryYet: "No history yet.",

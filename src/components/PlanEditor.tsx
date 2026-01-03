@@ -153,7 +153,7 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
             for (let i = targetBoundaryIndex; i > 0; i--) {
                 if (ends[i - 1] >= ends[i]) {
                     // Need to shrink prev
-                    const prevStep = getStepSizeForType(newRules[i - 1].type);
+                    // const prevStep = getStepSizeForType(newRules[i - 1].type);
                     // ends[i-1] must be < ends[i]
                     // max valid end for prev is ends[i] - 1 ? 
                     // Wait, start of i is ends[i-1] + 1.
@@ -164,9 +164,9 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                     // Actually, if we dragged i end to left, we might crush i.
                     // logic: ends[i-1] must be <= ends[i] - stepOfI.
                     // But wait, stepOfI is property of rule i.
-                    const stepOfCurrent = getStepSizeForType(newRules[i].type);
+                    // const stepOfCurrent = getStepSizeForType(newRules[i].type);
 
-                    let maxPrevEnd = ends[i] - stepOfCurrent;
+                    // let maxPrevEnd = ends[i] - stepOfCurrent;
                     // Also snap maxPrevEnd to prev's step logic?
                     // This gets complicated. Let's rely on normalizeRules mostly?
                     // But we want smooth dragging. 
