@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/fasting-cycles/sw.js', { scope: '/fasting-cycles/' })})}
