@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSettingsStore } from './store/useSettingsStore';
+import { useTranslation } from './hooks/useTranslation';
 import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
@@ -7,6 +8,13 @@ import Logbook from './components/Logbook';
 
 function App() {
   const lastPeriodStart = useSettingsStore((state) => state.lastPeriodStart);
+  const { t, language } = useTranslation();
+  const setLanguage = useSettingsStore((state) => state.setLanguage);
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en_US' ? 'pt_BR' : 'en_US');
+  };
+
   const [showSettings, setShowSettings] = useState(false);
   const [showLogbook, setShowLogbook] = useState(false);
 
@@ -25,10 +33,10 @@ function App() {
         gap: 'var(--space-xs)'
       }}>
         <h1 style={{ color: 'var(--c-primary)', marginBottom: '0', fontSize: '1.75rem', lineHeight: 1 }}>
-          Fasting Cycles
+          {t('appTitle')}
         </h1>
         <p style={{ color: 'var(--c-text-muted)', fontSize: '0.9rem', margin: 0 }}>
-          Sync your fasting with your rhythm
+          {t('appSubtitle')}
         </p>
 
         <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-sm)' }}>
@@ -43,10 +51,27 @@ function App() {
               padding: 'var(--space-xs)',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}
-            title="Logbook"
+            title={t('logbook')}
           >
             📖
           </button>
+
+          <button
+            onClick={toggleLanguage}
+            style={{
+              background: 'transparent',
+              fontSize: '1.5rem',
+              opacity: 0.8,
+              border: 'none',
+              cursor: 'pointer',
+              padding: 'var(--space-xs)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}
+            title={t('language')}
+          >
+            {language === 'en_US' ? '🇺🇸' : '🇧🇷'}
+          </button>
+
           <button
             onClick={() => setShowSettings(true)}
             style={{
@@ -58,7 +83,7 @@ function App() {
               padding: 'var(--space-xs)',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}
-            title="Settings"
+            title={t('settings')}
           >
             ⚙️
           </button>

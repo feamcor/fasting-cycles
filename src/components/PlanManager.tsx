@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useTranslation } from '../hooks/useTranslation';
 import { DEFAULT_PLANS } from '../data/defaultPlans';
 import PlanEditor from './PlanEditor';
 import type { Plan } from '../types';
 
 const PlanManager = () => {
     const { selectedPlanId, setSelectedPlanId, customPlans, addPlan, updatePlan, deletePlan } = useSettingsStore();
+    const { t } = useTranslation();
     const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
     const [isCreating, setIsCreating] = useState(false);
 
@@ -25,7 +27,7 @@ const PlanManager = () => {
     if (editingPlan || isCreating) {
         return (
             <div>
-                <h3 style={{ marginBottom: '16px' }}>{isCreating ? 'Create New Plan' : (DEFAULT_PLANS.some(p => p.id === editingPlan?.id) ? 'View Plan' : 'Edit Plan')}</h3>
+                <h3 style={{ marginBottom: '16px' }}>{isCreating ? t('createNewPlan') : (DEFAULT_PLANS.some(p => p.id === editingPlan?.id) ? t('viewPlan') : t('editPlan'))}</h3>
                 <PlanEditor
                     initialPlan={editingPlan || undefined}
                     onSave={handleSave}
@@ -39,12 +41,12 @@ const PlanManager = () => {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '1rem', color: 'var(--c-text-muted)', margin: 0 }}>Fasting Plans</h3>
+                <h3 style={{ fontSize: '1rem', color: 'var(--c-text-muted)', margin: 0 }}>{t('fastingPlans')}</h3>
                 <button
                     onClick={() => setIsCreating(true)}
-                    style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'var(--c-primary)', color: 'white', borderRadius: '4px', border: 'none' }}
+                    style={{ padding: '8px 12px', background: 'var(--c-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}
                 >
-                    + New
+                    {t('new')}
                 </button>
             </div>
 
@@ -66,24 +68,28 @@ const PlanManager = () => {
                                 style={{ cursor: 'pointer', paddingRight: '40px' }}
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span style={{ fontWeight: 600 }}>{plan.name}</span>
-                                    {isSelected && <span style={{ fontSize: '0.7rem', background: 'var(--c-primary)', color: 'white', padding: '2px 6px', borderRadius: '10px' }}>Active</span>}
+                                    <span style={{ fontWeight: 600 }}>
+                                        {plan.id === 'hormonal-harmony' ? t('planHormonalHarmony') : plan.name}
+                                    </span>
+                                    {isSelected && <span style={{ fontSize: '0.7rem', background: 'var(--c-primary)', color: 'white', padding: '2px 6px', borderRadius: '10px' }}>{t('active')}</span>}
                                 </div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--c-text-muted)', margin: '4px 0 0' }}>{plan.description}</p>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--c-text-muted)', margin: '4px 0 0' }}>
+                                    {plan.id === 'hormonal-harmony' ? t('descHormonalHarmony') : plan.description}
+                                </p>
                             </div>
 
                             <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px' }}>
                                 {!isDefault && (
                                     <>
-                                        <button onClick={() => setEditingPlan(plan)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--c-primary)', textDecoration: 'underline' }}>Edit</button>
+                                        <button onClick={() => setEditingPlan(plan)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--c-primary)', textDecoration: 'underline' }}>{t('edit')}</button>
                                         <button onClick={() => {
-                                            if (confirm('Delete this plan?')) deletePlan(plan.id);
+                                            if (confirm(t('deletePlanConfirm'))) deletePlan(plan.id);
                                         }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'red' }}>×</button>
                                     </>
                                 )}
                                 {isDefault && (
                                     <button onClick={() => setEditingPlan(plan)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--c-text-muted)' }}>
-                                        View
+                                        {t('viewPlan')}
                                     </button>
                                 )}
                             </div>

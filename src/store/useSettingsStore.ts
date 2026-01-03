@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UserSettings, CycleEntry, Plan, FastingTypeDef } from '../types';
 import { DEFAULT_PLANS } from '../data/defaultPlans';
+import type { Language } from '../i18n/translations';
 
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 
@@ -33,7 +34,20 @@ interface SettingsState extends UserSettings {
 
     // Global Reset
     resetAll: () => void;
+
+    // Language
+    language: Language;
+    setLanguage: (lang: Language) => void;
 }
+
+// Helper to detect language
+const detectLanguage = (): Language => {
+    if (typeof navigator === 'undefined') return 'pt_BR';
+    const lang = navigator.language;
+    if (lang.startsWith('pt')) return 'pt_BR';
+    if (lang.startsWith('en')) return 'en_US';
+    return 'pt_BR'; // Fallback
+};
 
 export const useSettingsStore = create<SettingsState>()(
     persist(
@@ -46,6 +60,7 @@ export const useSettingsStore = create<SettingsState>()(
             isFastingEnabled: true,
             customPlans: [],
             customFastingTypes: [],
+            language: detectLanguage(),
 
             fastingWindowStart: '20:00',
             fastingWindowEnd: '12:00',
@@ -196,6 +211,8 @@ export const useSettingsStore = create<SettingsState>()(
                 customFastingTypes: (state.customFastingTypes || []).filter(t => t.id !== id)
             })),
 
+            setLanguage: (language) => set({ language }),
+
             resetAll: () => set({
                 cycleLength: 28,
                 periodLength: 5,
@@ -206,7 +223,8 @@ export const useSettingsStore = create<SettingsState>()(
                 customPlans: [],
                 customFastingTypes: [],
                 fastingWindowStart: '20:00',
-                fastingWindowEnd: '12:00'
+                fastingWindowEnd: '12:00',
+                language: detectLanguage()
             }),
         }),
         {

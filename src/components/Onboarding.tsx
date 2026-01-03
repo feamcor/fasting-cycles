@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useTranslation } from '../hooks/useTranslation';
 
 const Onboarding = () => {
     const { setLastPeriodStart, setCycleLength, setPeriodLength } = useSettingsStore();
+    const { t } = useTranslation();
 
     const [date, setDate] = useState('');
     const [avgCycle, setAvgCycle] = useState(28);
@@ -25,8 +27,8 @@ const Onboarding = () => {
             marginTop: 'var(--space-xl)'
         }}>
             <div style={{ textAlign: 'center' }}>
-                <h2 style={{ marginBottom: 'var(--space-sm)' }}>Welcome, Sister</h2>
-                <p style={{ color: 'var(--c-text-muted)' }}>Let's sync with your natural rhythm.</p>
+                <h2 style={{ marginBottom: 'var(--space-sm)' }}>{t('greeting')}</h2>
+                <p style={{ color: 'var(--c-text-muted)' }}>{t('setupProfile')}</p>
             </div>
 
             <form onSubmit={handleSubmit} style={{
@@ -40,7 +42,7 @@ const Onboarding = () => {
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                     <label htmlFor="lastPeriod" style={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                        When did your last period start?
+                        {t('lastPeriodStart')}
                     </label>
                     <input
                         type="date"
@@ -60,7 +62,7 @@ const Onboarding = () => {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                     <label htmlFor="cycleLength" style={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                        Average Cycle Length (Days)
+                        {t('cycleLength')}
                     </label>
                     <input
                         type="number"
@@ -80,7 +82,7 @@ const Onboarding = () => {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                     <label htmlFor="periodLength" style={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                        Average Period Length (Days)
+                        {t('periodLength')}
                     </label>
                     <input
                         type="number"
@@ -108,7 +110,7 @@ const Onboarding = () => {
                     fontSize: '1rem',
                     boxShadow: 'var(--shadow-sm)'
                 }}>
-                    Start Tracking
+                    {t('startTracking')}
                 </button>
             </form>
         </div>

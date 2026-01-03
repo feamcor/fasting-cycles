@@ -1,8 +1,13 @@
 import { useSettingsStore } from '../store/useSettingsStore';
 import { differenceInCalendarDays, parseISO, format } from 'date-fns';
+import { enUS, ptBR } from 'date-fns/locale';
+import { useTranslation } from '../hooks/useTranslation';
 
 const Logbook = ({ onClose }: { onClose: () => void }) => {
     const { cycleHistory } = useSettingsStore();
+
+    const { t, language } = useTranslation();
+    const dateLocale = language === 'pt_BR' ? ptBR : enUS;
 
     return (
         <div style={{
@@ -23,7 +28,7 @@ const Logbook = ({ onClose }: { onClose: () => void }) => {
                 borderBottom: '1px solid #efefef', // Subtle separator
                 paddingBottom: 'var(--space-md)'
             }}>
-                <h2 style={{ fontSize: '1.5rem', color: 'var(--c-text-main)' }}>Logbook</h2>
+                <h2 style={{ fontSize: '1.5rem', color: 'var(--c-text-main)' }}>{t('logbook')}</h2>
                 <button
                     onClick={onClose}
                     style={{
@@ -41,8 +46,8 @@ const Logbook = ({ onClose }: { onClose: () => void }) => {
             <div style={{ flex: 1 }}>
                 {cycleHistory.length === 0 ? (
                     <div style={{ textAlign: 'center', color: 'var(--c-text-muted)', marginTop: 'var(--space-xl)' }}>
-                        <p>No history yet.</p>
-                        <p style={{ fontSize: '0.9rem' }}>Your cycles and fasting plans will appear here.</p>
+                        <p>{t('noHistoryYet')}</p>
+                        <p style={{ fontSize: '0.9rem' }}>{t('historyPlaceholder')}</p>
                     </div>
                 ) : (
                     cycleHistory.map((entry, index) => {
@@ -61,7 +66,7 @@ const Logbook = ({ onClose }: { onClose: () => void }) => {
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-xs)' }}>
                                     <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--c-text-main)' }}>
-                                        {format(start, 'MMM d, yyyy')}
+                                        {format(start, 'MMM d, yyyy', { locale: dateLocale })}
                                     </span>
                                     <span style={{
                                         fontSize: '0.8rem',
@@ -70,17 +75,17 @@ const Logbook = ({ onClose }: { onClose: () => void }) => {
                                         background: entry.endDate ? '#eee' : '#fff0f0',
                                         color: entry.endDate ? '#666' : 'red'
                                     }}>
-                                        {entry.endDate ? 'Completed' : 'Ongoing'}
+                                        {entry.endDate ? t('completed') : t('ongoing')}
                                     </span>
                                 </div>
 
                                 <div style={{ fontSize: '0.9rem', color: '#555', marginBottom: 'var(--space-xs)' }}>
-                                    {entry.endDate ? `Ended: ${format(end!, 'MMM d, yyyy')}` : 'Currently active'}
+                                    {entry.endDate ? `${t('ended')}: ${format(end!, 'MMM d, yyyy', { locale: dateLocale })}` : t('currentlyActive')}
                                 </div>
 
                                 {duration && (
                                     <div style={{ fontSize: '0.85rem', color: 'var(--c-text-muted)' }}>
-                                        Period Duration: {duration} days
+                                        {t('periodDuration')}: {duration} {t('days')}
                                     </div>
                                 )}
 
@@ -91,7 +96,7 @@ const Logbook = ({ onClose }: { onClose: () => void }) => {
                                     fontSize: '0.85rem',
                                     color: '#777'
                                 }}>
-                                    <strong>Plan:</strong> {entry.planSnapshot?.name || 'Unknown Plan'}
+                                    <strong>{t('activePlan')}:</strong> {entry.planSnapshot?.name || t('unknownPlan')}
                                 </div>
                             </div>
                         );

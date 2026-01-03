@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Plan, FastingRule } from '../types';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface PlanEditorProps {
     initialPlan?: Plan;
@@ -10,6 +11,7 @@ interface PlanEditorProps {
 }
 
 const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEditorProps) => {
+    const { t } = useTranslation();
     const { customFastingTypes = [] } = useSettingsStore();
 
     // Helper: Get required step size (in days) for a given type
@@ -280,7 +282,7 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
     return (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
             <div>
-                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '4px' }}>Plan Name</label>
+                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '4px' }}>{t('planName')}</label>
                 <input
                     required
                     value={name}
@@ -290,7 +292,7 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                 />
             </div>
             <div>
-                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '4px' }}>Description</label>
+                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '4px' }}>{t('description')}</label>
                 <textarea
                     value={description}
                     disabled={readOnly}
@@ -300,7 +302,7 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
             </div>
 
             <div style={{ marginTop: 'var(--space-md)' }}>
-                <h4 style={{ marginBottom: 'var(--space-sm)' }}>Rules</h4>
+                <h4 style={{ marginBottom: 'var(--space-sm)' }}>{t('rules')}</h4>
 
                 {rules.map((rule, i) => (
                     <div key={i} style={{
@@ -312,7 +314,7 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                     }}>
                         <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                             <div style={{ flex: 1 }}>
-                                <label style={{ fontSize: '0.8rem' }}>Start Day</label>
+                                <label style={{ fontSize: '0.8rem' }}>{t('startDay')}</label>
                                 <input
                                     type="number"
                                     value={rule.dayStart}
@@ -322,7 +324,7 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                                 />
                             </div>
                             <div style={{ flex: 1 }}>
-                                <label style={{ fontSize: '0.8rem' }}>End Day</label>
+                                <label style={{ fontSize: '0.8rem' }}>{t('endDay')}</label>
                                 <div style={{ display: 'flex', gap: '4px' }}>
                                     <input
                                         type="number"
@@ -333,27 +335,27 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                                         style={{ width: '100%', padding: '4px' }}
                                     />
                                     <button type="button" disabled={readOnly} onClick={() => toggleEnd(i)} style={{ fontSize: '0.7rem' }}>
-                                        {rule.dayEnd === 'END' ? 'Set #' : 'End'}
+                                        {rule.dayEnd === 'END' ? t('setHash') : t('end')}
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         <div style={{ marginBottom: '8px' }}>
-                            <label style={{ fontSize: '0.8rem' }}>Type</label>
+                            <label style={{ fontSize: '0.8rem' }}>{t('type')}</label>
                             <select
                                 value={rule.type}
                                 disabled={readOnly}
                                 onChange={e => updateRuleType(i, e.target.value)}
                                 style={{ width: '100%', padding: '4px' }}
                             >
-                                <optgroup label="Built-in">
-                                    <option value="STANDARD">Standard</option>
-                                    <option value="LIMIT_HOURS">Gentle Limit (12:12)</option>
-                                    <option value="NO_FASTING">No Fasting</option>
+                                <optgroup label={t('builtIn')}>
+                                    <option value="STANDARD">{t('standard')}</option>
+                                    <option value="LIMIT_HOURS">{t('gentleLimit')}</option>
+                                    <option value="NO_FASTING">{t('noFasting')}</option>
                                 </optgroup>
                                 {customFastingTypes.length > 0 && (
-                                    <optgroup label="My Custom Types">
+                                    <optgroup label={t('myCustomTypes')}>
                                         {customFastingTypes.map(t => (
                                             <option key={t.id} value={t.id}>{t.name} ({t.windowDuration || 24}h)</option>
                                         ))}
@@ -366,13 +368,13 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                             <div style={{ marginBottom: '8px', fontSize: '0.8rem', color: 'var(--c-text-muted)', background: '#f5f5f5', padding: '4px', borderRadius: '4px' }}>
                                 ℹ️ {customFastingTypes.find(t => t.id === rule.type)?.description}
                                 <br />
-                                <span style={{ fontSize: '0.75rem' }}>Duration Step: {getStepSizeForType(rule.type)} day(s)</span>
+                                <span style={{ fontSize: '0.75rem' }}>{t('durationStep')}: {getStepSizeForType(rule.type)} {t('durationStepDays')}</span>
                             </div>
                         )}
 
                         {!readOnly && (
                             <button type="button" onClick={() => removeRule(i)} style={{ color: 'red', fontSize: '0.8rem', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                                Remove Rule
+                                {t('removeRule')}
                             </button>
                         )}
                     </div>
@@ -387,18 +389,18 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                         borderRadius: 'var(--radius-md)',
                         cursor: 'pointer'
                     }}>
-                        + Add Cycle Phase Rule
+                        {t('addCyclePhaseRule')}
                     </button>
                 )}
             </div>
 
             <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
                 <button type="button" onClick={onCancel} style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid #ccc', borderRadius: 'var(--radius-md)' }}>
-                    {readOnly ? 'Close' : 'Cancel'}
+                    {readOnly ? t('close') : t('cancel')}
                 </button>
                 {!readOnly && (
                     <button type="submit" style={{ flex: 1, padding: '10px', background: 'var(--c-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)' }}>
-                        Save Plan
+                        {t('savePlan')}
                     </button>
                 )}
             </div>

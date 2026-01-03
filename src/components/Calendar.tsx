@@ -13,13 +13,19 @@ import {
     differenceInCalendarDays,
     parseISO
 } from 'date-fns';
+import { enUS, ptBR } from 'date-fns/locale';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useTranslation } from '../hooks/useTranslation';
 import { DEFAULT_PLANS } from '../data/defaultPlans';
 import { BUILT_IN_FASTING_TYPES } from '../data/fastingTypes';
 
 const Calendar = () => {
+    const { t, language } = useTranslation();
     const { lastPeriodStart, cycleLength, selectedPlanId, periodLength = 5, customPlans, customFastingTypes } = useSettingsStore();
     const [currentMonth, setCurrentMonth] = useState(new Date());
+
+    // Resolve Locale
+    const dateLocale = language === 'pt_BR' ? ptBR : enUS;
 
     // Resolve Plan
     const allPlans = [...DEFAULT_PLANS, ...(customPlans || [])];
@@ -47,7 +53,7 @@ const Calendar = () => {
                     ←
                 </button>
                 <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                    {format(currentMonth, 'MMMM yyyy')}
+                    {format(currentMonth, 'MMMM yyyy', { locale: dateLocale })}
                 </span>
                 <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
                     style={{ background: 'transparent', fontSize: '1.2rem', padding: 'var(--space-xs)' }}>
@@ -58,11 +64,21 @@ const Calendar = () => {
     };
 
     const daysOfWeek = () => {
-        const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        // Simple manual array or use date-fns to generate?
+        // Let's use hardcoded for now but localized? Or just symbols?
+        // S M T W T F S is quite universal but in PT it is D S T Q Q S S
+        // Let's generate from date-fns
+        const weekStart = startOfWeek(currentMonth, { locale: dateLocale });
+        const weekDays = [];
+        for (let i = 0; i < 7; i++) {
+            // Get first letter
+            weekDays.push(format(eachDayOfInterval({ start: weekStart, end: endOfWeek(weekStart, { locale: dateLocale }) })[i], 'EEEEE', { locale: dateLocale }));
+        }
+
         return (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 'var(--space-xs)' }}>
-                {days.map(day => (
-                    <div key={day} style={{
+                {weekDays.map((day, i) => (
+                    <div key={i} style={{
                         textAlign: 'center',
                         fontSize: '0.8rem',
                         color: 'var(--c-text-muted)',
@@ -119,8 +135,8 @@ const Calendar = () => {
     const cells = () => {
         const monthStart = startOfMonth(currentMonth);
         const monthEnd = endOfMonth(monthStart);
-        const startDate = startOfWeek(monthStart);
-        const endDate = endOfWeek(monthEnd);
+        const startDate = startOfWeek(monthStart, { locale: dateLocale });
+        const endDate = endOfWeek(monthEnd, { locale: dateLocale });
 
         const dateFormat = "d";
         const dayArray = eachDayOfInterval({ start: startDate, end: endDate });
@@ -188,10 +204,10 @@ const Calendar = () => {
                 flexWrap: 'wrap'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--c-period-bg)' }} /> Period
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--c-period-bg)' }} /> {t('period')}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--c-neutral-bg)' }} /> Non-Period
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--c-neutral-bg)' }} /> {t('nonPeriod')}
                 </div>
 
                 {planFastingTypes.map(type => (
@@ -215,7 +231,7 @@ const Calendar = () => {
                                 }} />
                             )}
                         </div>
-                        {type.name}
+                        {type.isSystem ? t(`typeName${type.id}` as any) : type.name}
                     </div>
                 ))}
             </div>

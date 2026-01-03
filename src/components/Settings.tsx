@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useTranslation } from '../hooks/useTranslation';
 
 import PlanManager from './PlanManager';
 import FastingTypeManager from './FastingTypeManager';
 import { generateMockHistory } from '../utils/seedData';
 
 const Settings = ({ onClose }: { onClose: () => void }) => {
+    const { t } = useTranslation();
     const {
         cycleLength,
         periodLength,
@@ -40,7 +42,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
             overflowY: 'auto'
         }}>
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xl)' }}>
-                <h2>Settings & Plans</h2>
+                <h2>{t('settingsAndPlans')}</h2>
                 <button onClick={onClose} style={{ background: 'transparent', fontSize: '1.5rem', border: 'none', cursor: 'pointer' }}>&times;</button>
             </header>
 
@@ -48,10 +50,10 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
 
                 {/* Basic Cycle Settings */}
                 <div style={{ background: '#f9f9f9', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid #eee' }}>
-                    <h3 style={{ marginTop: 0, fontSize: '1rem', color: 'var(--c-text-muted)' }}>Cycle Basics</h3>
+                    <h3 style={{ marginTop: 0, fontSize: '1rem', color: 'var(--c-text-muted)' }}>{t('cycleBasics')}</h3>
                     <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
                         <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: '0.9rem' }}>Cycle Length (Days)</label>
+                            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: '0.9rem' }}>{t('cycleLength')}</label>
                             <input
                                 type="number"
                                 value={cycleLength}
@@ -60,7 +62,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                             />
                         </div>
                         <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: '0.9rem' }}>Period Length (Days)</label>
+                            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: '0.9rem' }}>{t('periodLength')}</label>
                             <input
                                 type="number"
                                 value={periodLength}
@@ -78,9 +80,9 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                 <FastingTypeManager />
 
                 <div style={{ padding: 'var(--space-md)', background: '#f0f8ff', borderRadius: 'var(--radius-md)', border: '1px dashed #add8e6', textAlign: 'center' }}>
-                    <p style={{ margin: '0 0 var(--space-sm) 0', fontSize: '0.9rem', color: '#0066cc' }}>Dev Tools</p>
+                    <p style={{ margin: '0 0 var(--space-sm) 0', fontSize: '0.9rem', color: '#0066cc' }}>{t('devTools')}</p>
                     <button onClick={handleSeedData} style={{ background: '#0066cc', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                        🌱 Seed 1 Year Test Data
+                        🌱 {t('seedData')}
                     </button>
                 </div>
 
@@ -99,7 +101,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                             borderRadius: 'var(--radius-md)'
                         }}
                     >
-                        Reset All Data
+                        {t('resetAllData')}
                     </div>
                 ) : (
                     <div style={{
@@ -111,7 +113,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                         border: '1px solid red',
                         textAlign: 'center'
                     }}>
-                        <p style={{ color: 'red', fontWeight: 'bold', marginBottom: '10px' }}>Are you sure? This will delete ALL custom plans, fasting types, and cycle history.</p>
+                        <p style={{ color: 'red', fontWeight: 'bold', marginBottom: '10px' }}>{t('areYouSureReset')}</p>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                             <button
                                 onClick={handleReset}
@@ -119,7 +121,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                                     background: 'red', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer'
                                 }}
                             >
-                                Yes, Clear Everything
+                                {t('yesClear')}
                             </button>
                             <button
                                 onClick={() => setShowResetConfirm(false)}
@@ -127,7 +129,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
                                     background: 'transparent', color: '#333', border: '1px solid #ccc', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer'
                                 }}
                             >
-                                Cancel
+                                {t('cancel')}
                             </button>
                         </div>
                     </div>
