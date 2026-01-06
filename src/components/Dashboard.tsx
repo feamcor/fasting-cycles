@@ -91,7 +91,7 @@ const Dashboard = () => {
             {/* Cycle Card */}
             <div style={{
                 background: 'linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-dark) 100%)',
-                padding: 'var(--space-xl) var(--space-lg)',
+                padding: 'var(--space-lg)',
                 borderRadius: 'var(--radius-lg)',
                 color: 'white',
                 textAlign: 'center',
@@ -101,7 +101,7 @@ const Dashboard = () => {
             }}>
                 <div style={{ position: 'relative', zIndex: 1 }}>
                     <h3 style={{ opacity: 0.9, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                        {t('days')} {currentCycleDay}
+                        {t('day')} {currentCycleDay}
                     </h3>
                     <div style={{ fontSize: '3rem', fontWeight: 800, margin: 'var(--space-xs) 0' }}>
                         {advice.title}
