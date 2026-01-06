@@ -38,13 +38,6 @@ const Dashboard = () => {
 
         const cycleDays = Math.ceil((typeDef.windowDuration || 24) / 24);
 
-        const slotDesc = (typeDef.slots || []).map(s => {
-            const [d1, h1, m1] = s.start.split(':');
-            const [_d2, h2, m2] = s.end.split(':');
-            const dayLabel = cycleDays > 1 ? `${t('days')} ${parseInt(d1) + 1} ` : '';
-            return `${dayLabel}${h1}:${m1} - ${h2}:${m2}`;
-        }).join(', ');
-
         return {
             title: typeDef.isSystem ? t(`typeName${typeDef.id}` as any) : typeDef.name,
             text: `${typeDef.isSystem ? t(`typeDesc${typeDef.id}` as any) : (typeDef.description || '')}`
