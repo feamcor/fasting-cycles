@@ -1,4 +1,5 @@
-# ![Fasting Cycles Logo](public/logo.png) Fasting Cycles
+![Fasting Cycles Logo](public/logo64.png) 
+# Fasting Cycles
 
 **Fasting Cycles** is a progressive web application (PWA) designed to help users synchronize their intermittent fasting practice with their menstrual cycle. By adapting fasting windows and intensity based on hormonal phases, the app aims to support metabolic health without disrupting hormonal balance.
 
