@@ -6,6 +6,8 @@ import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
 import Logbook from './components/Logbook';
 
+import logo from './assets/logo.png';
+
 function App() {
   const lastPeriodStart = useSettingsStore((state) => state.lastPeriodStart);
   const { t, language } = useTranslation();
@@ -32,6 +34,7 @@ function App() {
         textAlign: 'center',
         gap: 'var(--space-xs)'
       }}>
+        <img src={logo} alt="App Logo" style={{ width: '120px', height: '120px', marginBottom: 'var(--space-xs)' }} />
         <h1 style={{ color: 'var(--c-primary)', marginBottom: '0', fontSize: '1.75rem', lineHeight: 1 }}>
           {t('appTitle')}
         </h1>
