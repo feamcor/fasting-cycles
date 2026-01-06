@@ -47,7 +47,7 @@ const Dashboard = () => {
 
         return {
             title: typeDef.isSystem ? t(`typeName${typeDef.id}` as any) : typeDef.name,
-            text: `${typeDef.isSystem ? t(`typeDesc${typeDef.id}` as any) : (typeDef.description || '')} Pattern: ${slotDesc}`
+            text: `${typeDef.isSystem ? t(`typeDesc${typeDef.id}` as any) : (typeDef.description || '')}`
         };
     };
 
