@@ -128,7 +128,7 @@ const Dashboard = () => {
 
             {/* Reality Check Controls */}
             <div style={{
-                marginBottom: 'var(--space-lg)',
+
                 background: 'var(--c-surface)',
                 padding: 'var(--space-md)',
                 borderRadius: 'var(--radius-lg)',
