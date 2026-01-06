@@ -1,13 +1,13 @@
-import { useMemo } from 'react';
-import { differenceInCalendarDays, parseISO, startOfDay, addDays } from 'date-fns';
-import { useSettingsStore } from '../store/useSettingsStore';
-import { DEFAULT_PLANS } from '../data/defaultPlans';
+import {useMemo} from 'react';
+import {addDays, differenceInCalendarDays, parseISO, startOfDay} from 'date-fns';
+import {useSettingsStore} from '../store/useSettingsStore';
+import {DEFAULT_PLANS} from '../data/defaultPlans';
 
 
 export const useCycleCalculator = () => {
     const { lastPeriodStart, cycleLength, selectedPlanId, customPlans } = useSettingsStore();
 
-    const status = useMemo(() => {
+    return useMemo(() => {
         if (!lastPeriodStart) return null;
 
         const today = startOfDay(new Date());
@@ -37,6 +37,4 @@ export const useCycleCalculator = () => {
             nextPeriodEstimated: addDays(startDate, Math.floor(daysSinceStart / cycleLength) * cycleLength + cycleLength)
         };
     }, [lastPeriodStart, cycleLength, selectedPlanId, customPlans]);
-
-    return status;
 };

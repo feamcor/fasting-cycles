@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { Plan, FastingRule } from '../types';
+import { useState, type FormEvent } from 'react';
+import type { FastingRule, Plan } from '../types';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -113,88 +113,51 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
         }
 
         if (targetBoundaryIndex >= 0 && targetBoundaryIndex < newRules.length) {
-            const ends = newRules.map(r => (r.dayEnd === 'END' ? 28 : r.dayEnd));
-            const step = getStepSizeForType(newRules[targetBoundaryIndex].type);
-            const startOfTarget = newRules[targetBoundaryIndex].dayStart;
+            const ruleToAdjust = newRules[targetBoundaryIndex];
+            const step = getStepSizeForType(ruleToAdjust.type);
+            const startOfTarget = ruleToAdjust.dayStart;
 
-            // Apply Snap Logic to Target
-            let requestedDuration = value - startOfTarget + 1;
-            if (requestedDuration < step) requestedDuration = step;
-            // Snap to nearest multiple
-            requestedDuration = Math.round(requestedDuration / step) * step;
+            let proposedEnd = value;
 
-            const newEnd = startOfTarget + requestedDuration - 1;
+            // Ensure proposedEnd is at least startOfTarget + step - 1
+            if (proposedEnd < startOfTarget + step - 1) {
+                proposedEnd = startOfTarget + step - 1;
+            }
 
-            ends[targetBoundaryIndex] = newEnd;
+            // Snap proposedEnd to a multiple of step
+            const duration = proposedEnd - startOfTarget + 1;
+            const snappedDuration = Math.max(step, Math.round(duration / step) * step);
+            proposedEnd = startOfTarget + snappedDuration - 1;
 
-            // Validation Propagation
-            // 1. Right Ripple
-            for (let i = targetBoundaryIndex; i < ends.length - 1; i++) {
-                // If overlap
-                if (ends[i + 1] <= ends[i]) {
-                    // Push next end to maintain its step?
-                    const nextTypeStep = getStepSizeForType(newRules[i + 1].type);
-                    // Start of next is ends[i] + 1.
-                    // Min end of next is Start + Step - 1
-                    // ends[i+1] must be >= ends[i] + 1 + nextTypeStep - 1
-                    // => ends[i+1] >= ends[i] + nextTypeStep
+            // Apply the change to the specific rule
+            newRules[targetBoundaryIndex].dayEnd = proposedEnd;
 
-                    // Current len
-                    // we want to preserve length if possible, or push?
-                    // Let's just push Start => pushes End.
-                    // But we only store ends array here.
-                    // Assuming constant length? No, usually ripple compresses or pushes.
-                    // Let's ensure minimal valid end.
-                    ends[i + 1] = ends[i] + nextTypeStep;
+            // If we are adjusting the end of a rule, and it's not the last rule,
+            // ensure the next rule's start is consistent.
+            if (targetBoundaryIndex < newRules.length - 1) {
+                const nextRule = newRules[targetBoundaryIndex + 1];
+                if (nextRule.dayStart <= proposedEnd) {
+                    nextRule.dayStart = proposedEnd + 1;
                 }
             }
 
-            // 2. Left Ripple (if pushed back)
-            for (let i = targetBoundaryIndex; i > 0; i--) {
-                if (ends[i - 1] >= ends[i]) {
-                    // Need to shrink prev
-                    // const prevStep = getStepSizeForType(newRules[i - 1].type);
-                    // ends[i-1] must be < ends[i]
-                    // max valid end for prev is ends[i] - 1 ? 
-                    // Wait, start of i is ends[i-1] + 1.
-                    // So ends[i] >= ends[i-1] + 1 + stepOfI - 1 = ends[i-1] + stepOfI.
-                    // So ends[i-1] <= ends[i] - stepOfI.
-
-                    // But here we are adjusting i-1 based on i.
-                    // Actually, if we dragged i end to left, we might crush i.
-                    // logic: ends[i-1] must be <= ends[i] - stepOfI.
-                    // But wait, stepOfI is property of rule i.
-                    // const stepOfCurrent = getStepSizeForType(newRules[i].type);
-
-                    // let maxPrevEnd = ends[i] - stepOfCurrent;
-                    // Also snap maxPrevEnd to prev's step logic?
-                    // This gets complicated. Let's rely on normalizeRules mostly?
-                    // But we want smooth dragging. 
-
-                    // Simple push back:
-                    ends[i - 1] = ends[i] - 1; // Raw push
+            // If we are adjusting the start of a rule (which means we adjusted the previous rule's end)
+            // ensure the current rule's start is consistent.
+            if (field === 'dayStart' && index > 0) {
+                const prevRule = newRules[index - 1];
+                if (newRules[index].dayStart <= (typeof prevRule.dayEnd === 'number' ? prevRule.dayEnd : 28)) {
+                    newRules[index].dayStart = (typeof prevRule.dayEnd === 'number' ? prevRule.dayEnd : 28) + 1;
                 }
             }
 
-            // Re-apply full normalization to handle complex ripple/step constraints safely
-            // We reconstruct the rules with the proposed changes and run normalize.
-            // But we need to update the state temporarily to run normalize.
-
-            // Let's just trust normalizeRules to fix specifics if we set the main boundary.
-            // We constructed 'ends'. Let's map back to rules and normalize.
-            let currentStart = 1;
-            for (let i = 0; i < newRules.length; i++) {
-                newRules[i].dayStart = currentStart;
-                newRules[i].dayEnd = ends[i];
-                currentStart = ends[i] + 1;
-            }
-            const normalized = normalizeRules(newRules);
-            setRules(normalized);
+            // Re-normalize the entire set of rules to handle all ripple effects and constraints
+            setRules(normalizeRules(newRules));
             return;
         }
 
-        // Fallback (should not happen for valid moves)
-        setRules(newRules);
+        // If for some reason the targetBoundaryIndex is invalid, just set the rules
+        // (This should ideally not be reached for valid user interactions)
+        setRules(normalizeRules(newRules));
     };
 
     const updateRuleType = (index: number, type: string) => {
@@ -214,43 +177,20 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
 
         // Check if there is space (at least 1 day, or 1 step?)
         // Default new rule is STANDARD (step 1). So 1 day is enough.
+        // If the cycle is already full (start > 28), we cannot add a new rule directly.
+        // We could try to shrink the last rule, but for simplicity, let's prevent adding if no space.
         if (start > 28) {
-            if (rules.length > 0) {
-                // Try to squeeze
-                const newRules = [...rules];
-                const lastIdx = newRules.length - 1;
-                const lastTypeStep = getStepSizeForType(newRules[lastIdx].type);
-
-                const lastEnd = newRules[lastIdx].dayEnd === 'END' ? 28 : newRules[lastIdx].dayEnd;
-
-                // Can we shrink last rule by its step?
-                // Current Duration
-                const curDur = lastEnd - newRules[lastIdx].dayStart + 1;
-                if (curDur > lastTypeStep) {
-                    newRules[lastIdx].dayEnd = lastEnd - lastTypeStep; // Shrink by one unit
-                    start = newRules[lastIdx].dayEnd + 1;
-                } else {
-                    return; // Cannot add
-                }
-
-                const newRule: FastingRule = {
-                    dayStart: start,
-                    dayEnd: start,
-                    type: 'STANDARD',
-                    description: ''
-                };
-                setRules(normalizeRules([...newRules, newRule]));
-                return;
-            }
-        } else {
-            const newRule: FastingRule = {
-                dayStart: start,
-                dayEnd: Math.min(start + 4, 28),
-                type: 'STANDARD',
-                description: ''
-            };
-            setRules(normalizeRules([...rules, newRule]));
+            console.warn("Cannot add a new rule: no space left in the cycle.");
+            return;
         }
+
+        const newRule: FastingRule = {
+            dayStart: start,
+            dayEnd: Math.min(start + getStepSizeForType('STANDARD') - 1, 28), // Default to 1 day, or step size if different
+            type: 'STANDARD',
+            description: ''
+        };
+        setRules(normalizeRules([...rules, newRule]));
     };
 
     const removeRule = (index: number) => {
@@ -260,15 +200,20 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
 
     const toggleEnd = (index: number) => {
         const newRules = [...rules];
-        if (newRules[index].dayEnd === 'END') {
-            newRules[index].dayEnd = 28;
+        const rule = newRules[index];
+
+        if (rule.dayEnd === 'END') {
+            // If it's 'END', change it to a specific day.
+            // We'll let normalizeRules figure out the exact day, but provide a hint.
+            rule.dayEnd = 28;
         } else {
-            newRules[index].dayEnd = 'END';
+            // If it's a specific day, change it to 'END'.
+            rule.dayEnd = 'END';
         }
         setRules(normalizeRules(newRules));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         const plan: Plan = {
             id: initialPlan?.id || `custom-${Date.now()}`,
@@ -331,7 +276,7 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                                         value={rule.dayEnd === 'END' ? 28 : rule.dayEnd}
                                         disabled={readOnly || rule.dayEnd === 'END'}
                                         onChange={e => adjustRules(i, 'dayEnd', Number(e.target.value))}
-                                        step={getStepSizeForType(rule.type)} // Hint to browser
+                                        step={getStepSizeForType(rule.type)} // Hint to browser for number input
                                         style={{ width: '100%', padding: '4px' }}
                                     />
                                     <button type="button" disabled={readOnly} onClick={() => toggleEnd(i)} style={{ fontSize: '0.7rem' }}>

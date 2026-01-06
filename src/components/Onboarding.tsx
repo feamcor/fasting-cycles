@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -10,7 +10,7 @@ const Onboarding = () => {
     const [avgCycle, setAvgCycle] = useState(28);
     const [avgPeriod, setAvgPeriod] = useState(5);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (date) {
             setLastPeriodStart(date);

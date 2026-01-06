@@ -96,4 +96,4 @@ async function generateAssets() {
     }
 }
 
-generateAssets();
+generateAssets().then(() => console.log('Asset generation complete.'));

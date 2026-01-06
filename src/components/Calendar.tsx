@@ -67,7 +67,7 @@ const Calendar = () => {
     const daysOfWeek = () => {
         // Simple manual array or use date-fns to generate?
         // Let's use hardcoded for now but localized? Or just symbols?
-        // S M T W T F S is quite universal but in PT it is D S T Q Q S S
+        // S M T W T F S is quite universal, but in PT it is D S T Q Q S S
         // Let's generate from date-fns
         const weekStart = startOfWeek(currentMonth, { locale: dateLocale });
         const weekDays = [];
@@ -108,7 +108,7 @@ const Calendar = () => {
             return adjustedCycleDay >= r.dayStart && adjustedCycleDay <= end;
         });
 
-        // 1. Determine Background (Period vs Non-Period)
+        // 1. Determine Background (Period vs. Non-Period)
         const isPeriod = adjustedCycleDay >= 1 && adjustedCycleDay <= periodLength;
         const backgroundColor = isPeriod ? 'var(--c-period-bg)' : 'var(--c-neutral-bg)';
         const color = 'var(--c-text-main)';
