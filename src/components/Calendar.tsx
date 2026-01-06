@@ -16,6 +16,7 @@ import {
 import { enUS, ptBR } from 'date-fns/locale';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useTranslation } from '../hooks/useTranslation';
+import type { TranslationKey } from '../i18n/translations';
 import { DEFAULT_PLANS } from '../data/defaultPlans';
 import { BUILT_IN_FASTING_TYPES } from '../data/fastingTypes';
 
@@ -231,7 +232,7 @@ const Calendar = () => {
                                 }} />
                             )}
                         </div>
-                        {type.isSystem ? t(`typeName${type.id}` as any) : type.name}
+                        {type.isSystem ? t(`typeName${type.id}` as TranslationKey) : type.name}
                     </div>
                 ))}
             </div>

@@ -3,6 +3,7 @@ import { useCycleCalculator } from '../hooks/useCycleCalculator';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { BUILT_IN_FASTING_TYPES } from '../data/fastingTypes';
 import { useTranslation } from '../hooks/useTranslation';
+import type { TranslationKey } from '../i18n/translations';
 import Calendar from './Calendar';
 
 
@@ -36,11 +37,9 @@ const Dashboard = () => {
             return { title: t('nourish'), text: t('noScheduledFasting') };
         }
 
-        const cycleDays = Math.ceil((typeDef.windowDuration || 24) / 24);
-
         return {
-            title: typeDef.isSystem ? t(`typeName${typeDef.id}` as any) : typeDef.name,
-            text: `${typeDef.isSystem ? t(`typeDesc${typeDef.id}` as any) : (typeDef.description || '')}`
+            title: typeDef.isSystem ? t(`typeName${typeDef.id}` as TranslationKey) : typeDef.name,
+            text: `${typeDef.isSystem ? t(`typeDesc${typeDef.id}` as TranslationKey) : (typeDef.description || '')}`
         };
     };
 

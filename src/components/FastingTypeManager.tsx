@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useTranslation } from '../hooks/useTranslation';
 import type { FastingTypeDef, FastingSlot } from '../types';
+import type { TranslationKey } from '../i18n/translations';
 import { BUILT_IN_FASTING_TYPES } from '../data/fastingTypes';
 
 const FastingTypeManager = () => {
@@ -179,7 +180,7 @@ const FastingTypeManager = () => {
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                {type.isSystem ? t(`typeName${type.id}` as any) : type.name}
+                                {type.isSystem ? t(`typeName${type.id}` as TranslationKey) : type.name}
                                 {type.isSystem && <span style={{ fontSize: '0.7em', border: '1px solid #ccc', padding: '0 4px', borderRadius: '2px' }}>{t('system')}</span>}
                             </div>
                             {!type.isSystem && (
@@ -197,7 +198,7 @@ const FastingTypeManager = () => {
                                 <div key={i}>{t('fasting')}: {formatTime(s.start)} - {formatTime(s.end)}</div>
                             ))}
                             {(!type.slots || type.slots.length === 0) && <div style={{ fontStyle: 'italic', color: '#888' }}>
-                                {type.isSystem ? t(`typeDesc${type.id}` as any) : t('noScheduledFastingEatAnytime')}
+                                {type.isSystem ? t(`typeDesc${type.id}` as TranslationKey) : t('noScheduledFastingEatAnytime')}
                             </div>}
                         </div>
                     </div>

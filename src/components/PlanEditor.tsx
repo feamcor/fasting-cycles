@@ -123,7 +123,7 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
             // Snap to nearest multiple
             requestedDuration = Math.round(requestedDuration / step) * step;
 
-            let newEnd = startOfTarget + requestedDuration - 1;
+            const newEnd = startOfTarget + requestedDuration - 1;
 
             ends[targetBoundaryIndex] = newEnd;
 
@@ -221,7 +221,7 @@ const PlanEditor = ({ initialPlan, onSave, onCancel, readOnly = false }: PlanEdi
                 const lastIdx = newRules.length - 1;
                 const lastTypeStep = getStepSizeForType(newRules[lastIdx].type);
 
-                let lastEnd = newRules[lastIdx].dayEnd === 'END' ? 28 : newRules[lastIdx].dayEnd;
+                const lastEnd = newRules[lastIdx].dayEnd === 'END' ? 28 : newRules[lastIdx].dayEnd;
 
                 // Can we shrink last rule by its step?
                 // Current Duration
