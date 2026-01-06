@@ -119,9 +119,9 @@ const Dashboard = () => {
                 borderRadius: 'var(--radius-lg)',
                 boxShadow: 'var(--shadow-md)'
             }}>
-                <h4 style={{ color: 'var(--c-text-muted)', marginBottom: 'var(--space-sm)', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                <h3 style={{ fontSize: '1rem', marginBottom: '4px' }}>
                     {t('guidance')}
-                </h4>
+                </h3>
                 <p style={{ fontSize: '1.1rem', lineHeight: 1.6 }}>{advice.text}</p>
 
             </div>
@@ -140,7 +140,7 @@ const Dashboard = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <h3 style={{ fontSize: '1rem', marginBottom: '4px' }}>{t('realityCheck')}</h3>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>{t('realityCheckSubtitle')}</p>
+                        <p style={{ fontSize: '1.1rem', lineHeight: 1.6 }}>{t('realityCheckSubtitle')}</p>
                     </div>
 
                     {!loggingMode && (
