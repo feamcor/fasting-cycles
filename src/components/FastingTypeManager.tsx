@@ -87,8 +87,8 @@ const FastingTypeManager = () => {
 
     return (
         <div style={{ marginTop: 'var(--space-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-                <h3>{t('fastingTypes')}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '1rem', color: 'var(--c-text-muted)', margin: 0 }}>{t('fastingTypes')}</h3>
                 {!isCreating && (
                     <button onClick={() => { resetForm(); setIsCreating(true); }} style={{ padding: '8px 12px', background: 'var(--c-primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
                         {t('newType')}

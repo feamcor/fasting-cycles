@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useTranslation } from '../hooks/useTranslation';
 
 import PlanManager from './PlanManager';
 import FastingTypeManager from './FastingTypeManager';
 import { generateMockHistory } from '../utils/seedData';
+import type { UserSettings } from '../types';
 
 const Settings = ({ onClose }: { onClose: () => void }) => {
     const { t } = useTranslation();
@@ -17,6 +18,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
     } = useSettingsStore();
 
     const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleReset = () => {
         resetAll();
@@ -30,6 +32,74 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
         const mockHistory = generateMockHistory();
         useSettingsStore.setState({ cycleHistory: mockHistory, lastPeriodStart: mockHistory[0]?.startDate || null });
         alert('Added 1 year of test data!');
+    };
+
+    const handleExport = () => {
+        const state = useSettingsStore.getState();
+        const dataToExport: UserSettings = {
+            cycleLength: state.cycleLength,
+            periodLength: state.periodLength,
+            lastPeriodStart: state.lastPeriodStart,
+            cycleHistory: state.cycleHistory,
+            selectedPlanId: state.selectedPlanId,
+            isFastingEnabled: state.isFastingEnabled,
+            customPlans: state.customPlans,
+            customFastingTypes: state.customFastingTypes,
+        };
+
+        const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mi = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+
+        a.download = `fasting-cycles-export-${yyyy}${mm}${dd}-${hh}${mi}${ss}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleImportClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const content = e.target?.result as string;
+                const parsedData = JSON.parse(content);
+
+                // Simple validation: check if critical fields exist
+                if (typeof parsedData.cycleLength === 'number' && Array.isArray(parsedData.cycleHistory)) {
+                    if (window.confirm(t('confirmImport') || 'Importing will replace all current data. Are you sure?')) {
+                        resetAll();
+                        useSettingsStore.setState(parsedData);
+                        alert(t('importSuccess') || 'Data imported successfully!');
+                        window.location.reload();
+                    }
+                } else {
+                    alert(t('invalidFile') || 'Invalid backup file');
+                }
+            } catch (error) {
+                console.error('Import error:', error);
+                alert(t('importError') || 'Error importing file');
+            }
+        };
+        reader.readAsText(file);
+        // Reset input so same file can be selected again if needed
+        event.target.value = '';
     };
 
     return (
@@ -50,7 +120,7 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
 
                 {/* Basic Cycle Settings */}
                 <div style={{ background: '#f9f9f9', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid #eee' }}>
-                    <h3 style={{ marginTop: 0, fontSize: '1rem', color: 'var(--c-text-muted)' }}>{t('cycleBasics')}</h3>
+                    <h3 style={{ fontSize: '1rem', color: 'var(--c-text-muted)', margin: 0, marginBottom: '16px' }}>{t('cycleBasics')}</h3>
                     <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
                         <div style={{ flex: 1 }}>
                             <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: '0.9rem' }}>{t('cycleLength')}</label>
@@ -75,15 +145,71 @@ const Settings = ({ onClose }: { onClose: () => void }) => {
 
                 <PlanManager />
 
-                <hr style={{ border: '0', borderTop: '1px solid #eee', margin: 0 }} />
+                {/* No HR here as per request */}
 
                 <FastingTypeManager />
 
-                <div style={{ padding: 'var(--space-md)', background: '#f0f8ff', borderRadius: 'var(--radius-md)', border: '1px dashed #add8e6', textAlign: 'center' }}>
-                    <p style={{ margin: '0 0 var(--space-sm) 0', fontSize: '0.9rem', color: '#0066cc' }}>{t('devTools')}</p>
-                    <button onClick={handleSeedData} style={{ background: '#0066cc', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                        🌱 {t('seedData')}
-                    </button>
+                {/* Data Management Section */}
+                <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '12px', border: '1px solid #e9ecef' }}>
+                    <h3 style={{ fontSize: '1rem', color: 'var(--c-text-muted)', margin: 0, marginBottom: '16px' }}>{t('dataManagement') || 'Data Management'}</h3>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <button onClick={handleExport} style={{
+                            background: '#fff',
+                            color: '#333',
+                            border: '1px solid #ddd',
+                            padding: '10px 16px',
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            flex: 1,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            fontWeight: 500
+                        }}>
+                            ⬇️ {t('exportData') || 'Export Data'}
+                        </button>
+                        <button onClick={handleImportClick} style={{
+                            background: '#fff',
+                            color: '#333',
+                            border: '1px solid #ddd',
+                            padding: '10px 16px',
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            flex: 1,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            fontWeight: 500
+                        }}>
+                            ⬆️ {t('importData') || 'Import Data'}
+                        </button>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept=".json"
+                            style={{ display: 'none' }}
+                        />
+                    </div>
+
+                    <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e9ecef' }}>
+                        <button onClick={() => {
+                            if (confirm('This will Overwrite your current history with test data. Are you sure?')) {
+                                handleSeedData();
+                            }
+                        }} style={{
+                            background: 'transparent',
+                            color: '#6c757d',
+                            border: 'none',
+                            padding: '8px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                            width: '100%',
+                            textAlign: 'left',
+                            textDecoration: 'underline'
+                        }}>
+                            🌱 {t('seedData')}
+                        </button>
+                    </div>
                 </div>
 
                 {!showResetConfirm ? (

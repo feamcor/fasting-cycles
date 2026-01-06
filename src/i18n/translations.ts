@@ -130,7 +130,14 @@ export const translations = {
         typeNameLIMIT_HOURS: "Gentle Limit (12:12)",
         typeDescLIMIT_HOURS: "Fasting from 20:00 to 08:00 next day.",
         typeNameNO_FASTING: "No Fasting",
-        typeDescNO_FASTING: "No scheduled fasting."
+        typeDescNO_FASTING: "No scheduled fasting.",
+        dataManagement: "Data Management",
+        exportData: "Export Data",
+        importData: "Import Data",
+        confirmImport: "Importing will replace all current data. Are you sure?",
+        importSuccess: "Data imported successfully!",
+        invalidFile: "Invalid backup file",
+        importError: "Error importing file",
     },
     pt_BR: {
         appTitle: "Ciclos de Jejum",
@@ -263,7 +270,14 @@ export const translations = {
         typeNameLIMIT_HOURS: "Limite Suave (12:12)",
         typeDescLIMIT_HOURS: "Jejum das 20:00 às 08:00 do dia seguinte.",
         typeNameNO_FASTING: "Sem Jejum",
-        typeDescNO_FASTING: "Nenhum jejum agendado."
+        typeDescNO_FASTING: "Nenhum jejum agendado.",
+        dataManagement: "Gerenciamento de Dados",
+        exportData: "Exportar Dados",
+        importData: "Importar Dados",
+        confirmImport: "A importação substituirá todos os dados atuais. Tem certeza?",
+        importSuccess: "Dados importados com sucesso!",
+        invalidFile: "Arquivo de backup inválido",
+        importError: "Erro ao importar arquivo",
     }
 };
 
