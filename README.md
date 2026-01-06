@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# ![Fasting Cycles Logo](public/logo.png) Fasting Cycles
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Fasting Cycles** is a progressive web application (PWA) designed to help users synchronize their intermittent fasting practice with their menstrual cycle. By adapting fasting windows and intensity based on hormonal phases, the app aims to support metabolic health without disrupting hormonal balance.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Cycle Tracking**: Log periods and track current cycle phase (Menstrual, Follicular, Ovulatory, Luteal).
+- **Smart Fasting Guidance**: Receive daily fasting recommendations adapted to your specific cycle day.
+- **Flexible Plans**:
+  - **Hormonal Harmony (Default)**: Optimized for cycle synchronization.
+  - **Gentle Start**: For beginners.
+  - **Custom Plans**: Create your own rules and schedules.
+- **Interactive Dashboard**: View today's status, fasting timer (if applicable), and "Reality Check" phase descriptions.
+- **Calendar View**: Visual overview of past cycles and future predictions with fasting indicators.
+- **Data Privacy**: All data is stored locally on your device.
+- **Import/Export**: Backup your data to JSON or transfer it between devices.
 
-## React Compiler
+## Technical Overview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Tech Stack
+- **Framework**: React 19
+- **Build Tool**: Vite
+- **Language**: TypeScript
+- **State Management**: Zustand
+- **Styling**: Vanilla CSS (CSS Variables)
+- **Date Handling**: date-fns
+- **PWA**: vite-plugin-pwa
 
-## Expanding the ESLint configuration
+### Data Persistence
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The application uses **local storage** for data persistence, implemented via Zustand's `persist` middleware.
+- **Storage Key**: `fasting-cycles-storage`
+- **Data Privacy**: No data is sent to any external server. Everything resides in the user's browser.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Project Structure
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── components/   # React components (Dashboard, Calendar, etc.)
+├── data/         # Static data (default plans)
+├── hooks/        # Custom React hooks
+├── i18n/         # Internationalization dictionary
+├── store/        # Zustand store (state & logic)
+├── styles/       # Global CSS and variables
+├── types/        # TypeScript interfaces
+└── utils/        # Helper functions
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Data Schema (Import/Export)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The export file is a JSON representation of the `UserSettings` interface.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```typescript
+interface UserSettings {
+  cycleLength: number;         // Average length of cycle in days
+  periodLength: number;        // Average length of period in days
+  lastPeriodStart: string;     // ISO Date (YYYY-MM-DD)
+  
+  // Historical Data
+  cycleHistory: {
+    startDate: string;         // ISO Date
+    endDate?: string;          // ISO Date
+    planSnapshot?: {           // Plan active during this cycle
+      id: string;
+      name: string;
+    };
+  }[];
+
+  // Configuration
+  selectedPlanId: string;      // ID of the active plan
+  isFastingEnabled: boolean;   // Master toggle for fasting features
+  language: 'en_US' | 'pt_BR';
+
+  // Custom Data
+  customPlans: Plan[];         // User-created plans
+  customFastingTypes: FastingTypeDef[]; // User-defined fasting windows (e.g., 16:8)
+}
 ```
